@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/stm32/shenzhou/src/stm32_can.c
+ * boards/arm/stm32/sapog/src/stm32_can.c
  *
  *   Copyright (C) 2012, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -50,7 +50,7 @@
 
 #include "stm32.h"
 #include "stm32_can.h"
-#include "shenzhou.h"
+#include "sapog.h"
 
 #ifdef CONFIG_CAN
 

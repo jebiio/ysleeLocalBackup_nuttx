@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/stm32/shenzhou/src/stm32_relays.c
+ * boards/arm/stm32/sapog/src/stm32_relays.c
  *
  *   Copyright (C) 2012, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -48,7 +48,7 @@
 #include <nuttx/signal.h>
 #include <arch/board/board.h>
 
-#include "shenzhou.h"
+#include "sapog.h"
 
 #ifdef CONFIG_ARCH_RELAYS
 

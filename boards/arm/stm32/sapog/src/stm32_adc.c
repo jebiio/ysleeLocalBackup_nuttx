@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/shenzhou/src/stm32_adc.c
+ * boards/sapog/src/stm32_adc.c
  *
  *   Copyright (C) 2011-2012, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -50,7 +50,7 @@
 #include "arm_arch.h"
 
 #include "stm32_pwm.h"
-#include "shenzhou.h"
+#include "sapog.h"
 
 #ifdef CONFIG_ADC
 

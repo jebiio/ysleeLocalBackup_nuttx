@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/stm32/shenzhou/src/stm32_autoleds.c
+ * boards/arm/stm32/sapog/src/stm32_autoleds.c
  *
  *   Copyright (C) 2012-2013, 2015-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -51,7 +51,7 @@
 #include "arm_arch.h"
 #include "arm_internal.h"
 #include "stm32.h"
-#include "shenzhou.h"
+#include "sapog.h"
 
 /****************************************************************************
  * Pre-processor Definitions

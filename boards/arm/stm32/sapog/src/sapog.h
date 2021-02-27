@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/stm32/shenzhou/src/shenzhou.h
+ * boards/arm/stm32/sapog/src/sapog.h
  *
  *   Copyright (C) 2012, 2016, 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_ARM_STM32_SHENZHOUL_SRC_SHENZHOU_H
-#define __BOARDS_ARM_STM32_SHENZHOUL_SRC_SHENZHOU_H
+#ifndef __BOARDS_ARM_STM32_SAPOG_SRC_SAPOG_H
+#define __BOARDS_ARM_STM32_SAPOG_SRC_SAPOG_H
 
 /****************************************************************************
  * Included Files
@@ -61,7 +61,7 @@
 #  undef CONFIG_STM32_SPI3
 #endif
 
-/* Shenzhou GPIO Configuration **********************************************************************/
+/* Sapog GPIO Configuration **********************************************************************/
 
 /* STM3240G-EVAL GPIOs ****************************************************************************/
 /* Ethernet
@@ -517,4 +517,4 @@ int stm32_w25initialize(int minor);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __BOARDS_ARM_STM32_SHENZHOUL_SRC_SHENZHOU_H */
+#endif /* __BOARDS_ARM_STM32_SAPOG_SRC_SAPOG_H */

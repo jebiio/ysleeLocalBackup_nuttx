@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/stm32/shenzhou/src/stm32_boot.c
+ * boards/arm/stm32/sapog/src/stm32_boot.c
  *
  *   Copyright (C) 2012, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -45,7 +45,7 @@
 #include <arch/board/board.h>
 
 #include "arm_arch.h"
-#include "shenzhou.h"
+#include "sapog.h"
 
 /****************************************************************************
  * Pre-processor Definitions

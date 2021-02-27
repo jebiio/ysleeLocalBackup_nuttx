@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/stm32/shenzhou/src/stm32_ili93xx.c
+ * boards/arm/stm32/sapog/src/stm32_ili93xx.c
  *
  *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
@@ -128,7 +128,7 @@
 
 #include "arm_arch.h"
 #include "stm32.h"
-#include "shenzhou.h"
+#include "sapog.h"
 
 /****************************************************************************
  * Pre-processor Definitions

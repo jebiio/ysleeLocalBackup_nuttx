@@ -64,3 +64,8 @@ CONFIG_ARCH_CHIP_STM32F105RC
    * CAN
    * SPI
    * Motor Driver
+
+# ToDo
+ * build 확인
+ * pin 바꾸기
+ * memory map (datasheet)

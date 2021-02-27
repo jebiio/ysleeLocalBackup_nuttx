@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/stm32/shenzhou/src/stm32_buttons.c
+ * boards/arm/stm32/sapog/src/stm32_buttons.c
  *
  *   Copyright (C) 2012, 2014-2015, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -46,7 +46,7 @@
 #include <nuttx/board.h>
 #include <arch/board/board.h>
 
-#include "shenzhou.h"
+#include "sapog.h"
 
 #ifdef CONFIG_ARCH_BUTTONS
 

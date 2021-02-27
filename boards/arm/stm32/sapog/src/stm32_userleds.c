@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/stm32/shenzhou/src/stm32_userleds.c
+ * boards/arm/stm32/sapog/src/stm32_userleds.c
  *
  *   Copyright (C) 2012-2013, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -49,7 +49,7 @@
 #include "arm_arch.h"
 #include "arm_internal.h"
 #include "stm32.h"
-#include "shenzhou.h"
+#include "sapog.h"
 
 #ifndef CONFIG_ARCH_LEDS
 

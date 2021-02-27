@@ -1537,6 +1537,18 @@ config ARCH_BOARD_SHENZHOU
 		Linux or Cygwin. See the http://www.armjishu.com for further information. This
 		board features the STMicro STM32F107VC MCU
 
+config ARCH_BOARD_SAPOG
+	bool "Sapog STM32F105 board"
+	depends on ARCH_CHIP_STM32F105RC
+	select ARCH_HAVE_LEDS
+	select ARCH_HAVE_BUTTONS
+	select ARCH_HAVE_IRQBUTTONS
+	---help---
+		This port uses the Sapog STM32 F105 board and a GNU arm-nuttx-elf toolchain* under
+		Linux or Cygwin. See the http://www.armjishu.com for further information. This
+		board features the STMicro STM32F105RC MCU
+
+
 config ARCH_BOARD_SKP16C26
 	bool "Renesas SKP16C26 StarterKit"
 	depends on ARCH_CHIP_M30262F8

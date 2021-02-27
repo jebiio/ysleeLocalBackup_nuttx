@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/stm32/shenzhou/src/stm32_ssd1289.c
+ * boards/arm/stm32/sapog/src/stm32_ssd1289.c
  *
  * This logic supports the connection of an SSD1289-based LCD to the Shenzhou IV
  * board.
@@ -59,7 +59,7 @@
 
 #include "arm_arch.h"
 #include "stm32.h"
-#include "shenzhou.h"
+#include "sapog.h"
 
 #ifdef CONFIG_LCD_SSD1289
 

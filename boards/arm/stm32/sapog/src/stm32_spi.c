@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/stm32/shenzhou/src/stm32_spi.c
+ * boards/arm/stm32/sapog/src/stm32_spi.c
  *
  *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -49,7 +49,7 @@
 #include "arm_arch.h"
 #include "chip.h"
 #include "stm32.h"
-#include "shenzhou.h"
+#include "sapog.h"
 
 #if defined(CONFIG_STM32_SPI1) || defined(CONFIG_STM32_SPI3)
 

@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/stm32/shenzhou/src/stm32_touchscreen.c
+ * boards/arm/stm32/sapog/src/stm32_touchscreen.c
  *
  *   Copyright (C) 2011-2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -52,7 +52,7 @@
 #include <nuttx/input/ads7843e.h>
 
 #include "stm32.h"
-#include "shenzhou.h"
+#include "sapog.h"
 
 /****************************************************************************
  * Pre-processor Definitions
