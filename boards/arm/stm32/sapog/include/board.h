@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/stm32/shenzhou/include/board.h
+ * boards/arm/stm32/sapog/include/board.h
  *
  *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_ARM_STM32_SHENZHOU_INCLUDE_BOARD_H
-#define __BOARDS_ARM_STM32_SHENZHOU_INCLUDE_BOARD_H
+#ifndef __BOARDS_ARM_STM32_SAPOG_INCLUDE_BOARD_H
+#define __BOARDS_ARM_STM32_SAPOG_INCLUDE_BOARD_H
 
 /****************************************************************************
  * Included Files
@@ -368,7 +368,7 @@ extern "C" {
  *
  ****************************************************************************/
 
-void stm32_lcdclear(uint16_t color);
+//void stm32_lcdclear(uint16_t color);
 
 /****************************************************************************
  * Relay control functions
@@ -411,4 +411,4 @@ const char *stm32_getchipid_string(void);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __BOARDS_ARM_STM32_SHENZHOU_INCLUDE_BOARD_H */
+#endif /* __BOARDS_ARM_STM32_SAPOG_INCLUDE_BOARD_H */

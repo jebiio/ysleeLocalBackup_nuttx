@@ -39,3 +39,28 @@ CONFIG_ARCH_CHIP_STM32F105RC
      * /tools
      * Kconfig
      * README.txt
+
+# /stm32/sapog
+  * /configs (config define)
+    * /nsh
+    * /debug
+  * /include (header for sapog)
+    * board.h
+  * /scripts (ld script)
+    * ld.script
+    * ld.script.dfu
+    * Make.defs
+  * /src (stm32 drivers)
+    * stm32 drivers
+  * /tools (olimex debugger 도구)
+    * ocd config
+  * Kconfig (interactive kconfig를 위한 script)
+  * README.md
+
+# stm32 spec
+
+# sapog 회로도
+ * pin map
+   * CAN
+   * SPI
+   * Motor Driver

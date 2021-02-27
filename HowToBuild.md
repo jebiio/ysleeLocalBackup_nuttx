@@ -28,7 +28,8 @@ $ ./tools/configure.sh -L | less
 $ cd nuttx
 $ ./tools/configure.sh -l <board-name>:<config-dir>
 # 예제:
-$ ./tools/configure.sh -l sama5d27-xult:nsh
+$ ./tools/configure.sh -l shenzhou:nsh
+$ ./tools/configure.sh shenzhou:nsh
 ```
 
 여기서 -l 옵션은 linux에서 빌드한다는 뜻이다.
