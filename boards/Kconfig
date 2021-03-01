@@ -2307,6 +2307,7 @@ config ARCH_BOARD
 	default "same70-xplained"          if ARCH_BOARD_SAME70_XPLAINED
 	default "samv71-xult"              if ARCH_BOARD_SAMV71_XULT
 	default "shenzhou"                 if ARCH_BOARD_SHENZHOU
+	default "sapog"                    if ARCH_BOARD_SAPOG
 	default "skp16c26"                 if ARCH_BOARD_SKP16C26
 	default "photon"                   if ARCH_BOARD_PHOTON
 	default "pnev5180b"                if ARCH_BOARD_PNEV5180B
