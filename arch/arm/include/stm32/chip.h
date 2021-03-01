@@ -890,7 +890,7 @@
 #  define STM32_NRNG                     0   /* No random number generator (RNG) */
 #  define STM32_NDCMI                    0   /* No digital camera interface (DCMI) */
 
-#elif defined(CONFIG_ARCH_CHIP_STM32F105RB)
+#elif defined(CONFIG_ARCH_CHIP_STM32F105RB) || defined(CONFIG_ARCH_CHIP_STM32F105RC)
 #  define STM32_NFSMC                    1   /* FSMC */
 #  define STM32_NATIM                    1   /* One advanced timers TIM1 */
 #  define STM32_NGTIM                    4   /* 16-bit general timers TIM2-5 with DMA */

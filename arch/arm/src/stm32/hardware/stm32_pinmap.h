@@ -107,6 +107,9 @@
 #  elif defined(CONFIG_ARCH_CHIP_STM32F105RB)
 #    include "hardware/stm32f105r_pinmap.h"
 
+#  elif defined(CONFIG_ARCH_CHIP_STM32F105RC)
+#    include "hardware/stm32f105r_pinmap.h"
+
 #  elif defined(CONFIG_ARCH_CHIP_STM32F107VC)
 #    include "hardware/stm32f107v_pinmap.h"
 #  else
