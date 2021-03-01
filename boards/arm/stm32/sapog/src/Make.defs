@@ -75,18 +75,6 @@ ifeq ($(CONFIG_ADC),y)
 CSRCS += stm32_adc.c
 endif
 
-# NOTE: SSD1289 is not supported on the board
-
-ifeq ($(CONFIG_LCD_SSD1289),y)
-CSRCS += stm32_ssd1289.c
-else
-CSRCS += stm32_ili93xx.c
-endif
-
-ifeq ($(CONFIG_INPUT_ADS7843E),y)
-CSRCS += stm32_touchscreen.c
-endif
-
 DEPPATH += --dep-path board
 VPATH += :board
 CFLAGS += $(shell $(INCDIR) "$(CC)" $(TOPDIR)$(DELIM)arch$(DELIM)$(CONFIG_ARCH)$(DELIM)src$(DELIM)board$(DELIM)board)
