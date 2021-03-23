@@ -30,6 +30,17 @@ CONFIG_ARCH_CHIP_STM32F105RC
 ```c++
 
 ```
+ * arch/arm/src/stm32/Kconfig
+```bash
+config ARCH_CHIP_STM32F105RC
+	bool "STM32F105RC"
+	select STM32_STM32F10XX
+	select STM32_CONNECTIVITYLINE
+	select STM32_HAVE_DAC1
+	select STM32_HAVE_I2C2
+	select STM32_HAVE_TIM4
+```
+
  * board 추가하기
    * nuttx/boards/arm/stm32/sapog
      * /configs/
@@ -56,6 +67,12 @@ CONFIG_ARCH_CHIP_STM32F105RC
     * ocd config
   * Kconfig (interactive kconfig를 위한 script)
   * README.md
+# boards/arm/stm32/sapog/configs/nsh/defconfig
+
+```
+.config 파일 수정 : make menuconfig
+deconfig 파일 생성 : make savedefconfig
+```
 
 # stm32 spec
 

@@ -8,11 +8,11 @@ $ git clone https://github.com/apache/incubator-nuttx-apps apps
 $ git clone https://bitbucket.org/nuttx/tools.git tools
 ```
 
-# kconfig-frontends 패키지 설치
+# kconfig-frontends 패키지 설치 (Ubuntu 20.04 이상) 
 NuttX는 kconfig 를 사용해서 menuconfig.
 
 ```bash
-$ apt install kconfig-frontends
+$ sudo apt install kconfig-frontends
 ```
 
 # 사용 가능한 NuttX Base Configuration 목록 보기
