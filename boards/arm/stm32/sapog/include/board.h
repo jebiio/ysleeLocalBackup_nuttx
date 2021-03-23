@@ -59,11 +59,11 @@
 
 /* HSI - 8 MHz RC factory-trimmed
  * LSI - 40 KHz RC (30-60KHz, uncalibrated)
- * HSE - On-board crystal frequency is 25MHz
+ * HSE - On-board crystal frequency is 24MHz
  * LSE - 32.768 kHz
  */
 
-#define STM32_BOARD_XTAL        25000000ul
+#define STM32_BOARD_XTAL        24000000ul
 
 #define STM32_HSI_FREQUENCY     8000000ul
 #define STM32_LSI_FREQUENCY     40000
