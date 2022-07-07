@@ -428,13 +428,13 @@ static inline void rcc_enableapb2(void)
 #ifdef CONFIG_STM32_ADC1
   /* ADC 1 interface clock enable */
 
-  regval |= RCC_APB2ENR_ADC1EN;
+  // regval |= RCC_APB2ENR_ADC1EN; // <YS>
 #endif
 
 #ifdef CONFIG_STM32_ADC2
   /* ADC 2 interface clock enable */
 
-  regval |= RCC_APB2ENR_ADC2EN;
+  // regval |= RCC_APB2ENR_ADC2EN; // <YS>
 #endif
 
 #ifdef CONFIG_STM32_TIM1
@@ -544,11 +544,12 @@ static void stm32_stdclockconfig(void)
   putreg32(regval, STM32_RCC_CFGR2);
 
   /* Set the PCLK2 divider */
-
+  // <YS>
   regval = getreg32(STM32_RCC_CFGR);
-  regval &= ~(RCC_CFGR_PPRE2_MASK | RCC_CFGR_HPRE_MASK);
+  regval &= ~(RCC_CFGR_PPRE2_MASK | RCC_CFGR_HPRE_MASK | RCC_CFGR_ADCPRE_MASK);
   regval |= STM32_RCC_CFGR_PPRE2;
   regval |= RCC_CFGR_HPRE_SYSCLK;
+  regval |= STM32_RCC_CFGR_ADCPRE;
   putreg32(regval, STM32_RCC_CFGR);
 
   /* Set the PCLK1 divider */

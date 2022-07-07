@@ -111,13 +111,13 @@ int nxtask_init(FAR struct task_tcb_s *tcb, const char *name, int priority,
   if (stack)
     {
       /* Use pre-allocated stack */
-
+      
       ret = up_use_stack(&tcb->cmn, stack, stack_size);
     }
   else
     {
       /* Allocate the stack for the TCB */
-
+      
       ret = up_create_stack(&tcb->cmn, stack_size, ttype);
     }
 
@@ -154,7 +154,7 @@ int nxtask_init(FAR struct task_tcb_s *tcb, const char *name, int priority,
   dq_rem((FAR dq_entry_t *)tcb, (FAR dq_queue_t *)&g_inactivetasks);
 
 errout_with_group:
-
+ 
   if (!stack && tcb->cmn.stack_alloc_ptr)
     {
 #ifdef CONFIG_BUILD_KERNEL

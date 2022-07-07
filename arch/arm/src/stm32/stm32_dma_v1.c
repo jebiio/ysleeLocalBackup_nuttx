@@ -56,6 +56,7 @@
 #include "stm32_dma.h"
 #include "stm32.h"
 
+
 /* This file supports the STM32 DMA IP core version 1 - F0, F1, F3, G4, L0,
  * L1, L4.
  *
@@ -914,3 +915,16 @@ uint32_t stm32_dma_intget(unsigned int chndx)
          DMA_ISR_CHAN_MASK(dmach->chan);
 }
 #endif /* CONFIG_ARCH_HIPRI_INTERRUPT */
+
+/****************************************************************************
+ * Name: dmachan_putreg_wrapper
+ *
+ * Description:
+ *   
+ * 
+ ****************************************************************************/
+
+void dmachan_putreg_wrapper(DMA_HANDLE handle, uint32_t offset, uint32_t value)
+{
+  dmachan_putreg_wrapper(handle, offset, value);
+}

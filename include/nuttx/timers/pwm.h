@@ -122,6 +122,33 @@
 #define PWMIOC_START              _PWMIOC(3)
 #define PWMIOC_STOP               _PWMIOC(4)
 
+// <YS>
+#define SP_init_timer1               0
+#define SP_init_timer2               1
+#define SP_getreg                    2
+#define SP_putreg                    3
+#define SP_modifyreg                 4
+#define SP_outputs_enable            5
+#define SP_ccr_update                6
+#define SP_ackCC1Int                 7
+#define SP_disableCC1Int 8
+#define SP_enableint 9
+#define SP_getcounter 10
+#define SP_getcapture1 11
+#define SP_setcompare1 12
+#define SP_preackint 13
+#define SP_checkDisable 14
+#define SP_setMaster 15
+#define SP_setSlave 16
+#define SP_startAll 17
+#define SP_checkEnable 18
+#define SP_setTim1Trig 19
+#define SP_setTim2Trig 20
+#define SP_phase_reset_all_i 21
+#define SP_phase_reset_i 22
+#define SP_phase_set_i 23
+#define SP_updateCCR2 24
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/
@@ -131,7 +158,7 @@
  */
 
 #ifdef CONFIG_PWM_MULTICHAN
-struct pwm_chan_s
+    struct pwm_chan_s
 {
   ub16_t  duty;
   uint8_t channel;
@@ -157,7 +184,8 @@ struct pwm_info_s
                                  * generate an indefinite number of pulses */
 #  endif
 #endif /* CONFIG_PWM_MULTICHAN */
-};
+
+
 
 /* This structure is a set a callback functions used to call from the upper-
  * half, generic PWM driver into lower-half, platform-specific logic that
@@ -228,6 +256,47 @@ struct pwm_lowerhalf_s
   /* The custom timer state structure may include additional fields after
    * the pointer to the PWM callback structure.
    */
+};
+
+// <YS>
+
+struct arg_pwm_init
+{
+  uint16_t ARR;
+  uint16_t dead_time_ticks;
+  uint16_t CCR2;
+};
+
+// <YS>
+uint16_t dead_time_ticks;
+uint16_t _adc_blanking_ticks;
+};
+
+struct arg_pwm_reg
+{
+  int offset;
+  uint32_t value;
+  uint32_t clearbits;
+  uint32_t setbits;
+};
+
+struct arg_pwm_output
+{
+  uint16_t outputs;
+  bool state;
+};
+
+struct arg_pwm_reg1
+{
+  uint8_t index;
+  uint32_t value;
+};
+
+struct arg_pwm_phase_set_i
+{
+  uint_fast8_t phase;
+  uint_fast16_t pwm_val;
+  bool inverted;
 };
 
 /****************************************************************************

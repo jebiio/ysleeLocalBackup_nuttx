@@ -95,6 +95,24 @@
 #define TCIOC_SETTIMEOUT   _TCIOC(0x0004)
 #define TCIOC_NOTIFICATION _TCIOC(0x0005)
 #define TCIOC_MAXTIMEOUT   _TCIOC(0x0006)
+#define TCIOC_IOCTL        _TCIOC(0x0007)
+
+// <YS>
+#define SP_nvicEnableVector 0
+#define SP_startTimer4 1
+#define SP_startTimer6 2
+#define SP_putreg16 3
+#define SP_getreg16 4
+#define SP_ackCC1Int 5
+#define SP_disableCC1Int 6
+#define SP_enableCC1Int 7
+#define SP_getcounter 8
+#define SP_getcapture1 9
+#define SP_setcompare1 10
+#define SP_preackint 11
+#define SP_tim6Isr 12
+#define SP_checkTim6UIF 13
+#define SP_setCC1G 14
 
 /* Bit Settings *************************************************************/
 
@@ -107,6 +125,34 @@
 /****************************************************************************
  * Public Types
  ****************************************************************************/
+
+// <YS>
+
+struct arg_timer_isr
+{
+  xcpt_t isrAddr;
+  uint32_t prio;
+};
+
+struct arg_timer_reg1
+{
+  uint16_t arr;
+  uint16_t psc;
+};
+
+struct arg_timer_reg
+{
+  int offset;
+  uint32_t value;
+  uint32_t clearbits;
+  uint32_t setbits;
+};
+
+struct arg_timer_output
+{
+  uint16_t outputs;
+  bool state;
+};
 
 /* Upper half callback prototype. Returns true to reload the timer, and the
  * function can modify the next interval if desired.
@@ -293,6 +339,8 @@ void timer_unregister(FAR void *handle);
  ****************************************************************************/
 
 int timer_setcallback(FAR void *handle, tccb_t callback, FAR void *arg);
+// <YS>
+int tim4_timer_setcallback(FAR void *handle, tccb_t callback, FAR void *arg);
 
 /****************************************************************************
  * Platform-Independent "Lower-Half" Timer Driver Interfaces

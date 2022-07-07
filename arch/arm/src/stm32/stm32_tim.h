@@ -72,6 +72,12 @@
 #define STM32_TIM_ACKINT(d,s)           ((d)->ops->ackint(d,s))
 #define STM32_TIM_CHECKINT(d,s)         ((d)->ops->checkint(d,s))
 
+// <YS>
+#define STM32_TIM_PRIORITIZEIRQ(d, p)  ((d)->ops->prioritize(d, p))
+#define STM32_TIM_PUTREG16(d, o, v)    ((d)->ops->sp_putreg16(d, o, v))
+#define STM32_TIM_GETREG16(d, o)       ((d)->ops->sp_getreg16(d, o))
+#define STM32_TIM_MODREG16(d, o, c, s) ((d)->ops->sp_modreg16(d, o, c, s))
+
 /************************************************************************************
  * Public Types
  ************************************************************************************/
@@ -91,32 +97,32 @@ extern "C"
 
 struct stm32_tim_dev_s
 {
-  struct stm32_tim_ops_s *ops;
+    struct stm32_tim_ops_s *ops;
 };
 
 /* TIM Modes of Operation */
 
 typedef enum
 {
-  STM32_TIM_MODE_UNUSED       = -1,
+    STM32_TIM_MODE_UNUSED       = -1,
 
-  /* One of the following */
+    /* One of the following */
 
-  STM32_TIM_MODE_MASK         = 0x0310,
-  STM32_TIM_MODE_DISABLED     = 0x0000,
-  STM32_TIM_MODE_UP           = 0x0100,
-  STM32_TIM_MODE_DOWN         = 0x0110,
-  STM32_TIM_MODE_UPDOWN       = 0x0200,
-  STM32_TIM_MODE_PULSE        = 0x0300,
+    STM32_TIM_MODE_MASK         = 0x0310,
+    STM32_TIM_MODE_DISABLED     = 0x0000,
+    STM32_TIM_MODE_UP           = 0x0100,
+    STM32_TIM_MODE_DOWN         = 0x0110,
+    STM32_TIM_MODE_UPDOWN       = 0x0200,
+    STM32_TIM_MODE_PULSE        = 0x0300,
 
-  /* One of the following */
+    /* One of the following */
 
-  STM32_TIM_MODE_CK_INT       = 0x0000,
+    STM32_TIM_MODE_CK_INT       = 0x0000,
 //STM32_TIM_MODE_CK_INT_TRIG  = 0x0400,
 //STM32_TIM_MODE_CK_EXT       = 0x0800,
 //STM32_TIM_MODE_CK_EXT_TRIG  = 0x0C00,
 
-  /* Clock sources, OR'ed with CK_EXT */
+    /* Clock sources, OR'ed with CK_EXT */
 
 //STM32_TIM_MODE_CK_CHINVALID = 0x0000,
 //STM32_TIM_MODE_CK_CH1       = 0x0001,
@@ -124,7 +130,7 @@ typedef enum
 //STM32_TIM_MODE_CK_CH3       = 0x0003,
 //STM32_TIM_MODE_CK_CH4       = 0x0004
 
-  /* Todo: external trigger block */
+    /* Todo: external trigger block */
 
 } stm32_tim_mode_t;
 
@@ -132,23 +138,23 @@ typedef enum
 
 typedef enum
 {
-  STM32_TIM_CH_DISABLED       = 0x00,
+    STM32_TIM_CH_DISABLED       = 0x00,
 
-  /* Common configuration */
+    /* Common configuration */
 
-  STM32_TIM_CH_POLARITY_POS   = 0x00,
-  STM32_TIM_CH_POLARITY_NEG   = 0x01,
+    STM32_TIM_CH_POLARITY_POS   = 0x00,
+    STM32_TIM_CH_POLARITY_NEG   = 0x01,
 
-  /* MODES: */
+    /* MODES: */
 
-  STM32_TIM_CH_MODE_MASK      = 0x06,
+    STM32_TIM_CH_MODE_MASK      = 0x06,
 
-  /* Output Compare Modes */
+    /* Output Compare Modes */
 
-  STM32_TIM_CH_OUTPWM         = 0x04,     /** Enable standard PWM mode, active high when counter < compare */
+    STM32_TIM_CH_OUTPWM         = 0x04,     /** Enable standard PWM mode, active high when counter < compare */
 //STM32_TIM_CH_OUTCOMPARE     = 0x06,
 
-  // TODO other modes ... as PWM capture, ENCODER and Hall Sensor
+    // TODO other modes ... as PWM capture, ENCODER and Hall Sensor
 //STM32_TIM_CH_INCAPTURE      = 0x10,
 //STM32_TIM_CH_INPWM          = 0x20
 //STM32_TIM_CH_DRIVE_OC   -- open collector mode
@@ -159,35 +165,47 @@ typedef enum
 
 struct stm32_tim_ops_s
 {
-  /* Basic Timers */
+    /* Basic Timers */
 
-  int  (*setmode)(FAR struct stm32_tim_dev_s *dev, stm32_tim_mode_t mode);
-  int  (*setclock)(FAR struct stm32_tim_dev_s *dev, uint32_t freq);
-  void (*setperiod)(FAR struct stm32_tim_dev_s *dev, uint32_t period);
-  uint32_t (*getcounter)(FAR struct stm32_tim_dev_s *dev);
-  void (*setcounter)(FAR struct stm32_tim_dev_s *dev, uint32_t count);
+    int  (*setmode)(FAR struct stm32_tim_dev_s *dev, stm32_tim_mode_t mode);
+    int  (*setclock)(FAR struct stm32_tim_dev_s *dev, uint32_t freq);
+    void (*setperiod)(FAR struct stm32_tim_dev_s *dev, uint32_t period);
+    uint32_t (*getcounter)(FAR struct stm32_tim_dev_s *dev);
+    void (*setcounter)(FAR struct stm32_tim_dev_s *dev, uint32_t count);
 
-  /* General and Advanced Timers Adds */
+    /* General and Advanced Timers Adds */
 
-  int  (*getwidth)(FAR struct stm32_tim_dev_s *dev);
-  int  (*setchannel)(FAR struct stm32_tim_dev_s *dev, uint8_t channel,
-                     stm32_tim_channel_t mode);
-  int  (*setcompare)(FAR struct stm32_tim_dev_s *dev, uint8_t channel,
-                     uint32_t compare);
-  int  (*getcapture)(FAR struct stm32_tim_dev_s *dev, uint8_t channel);
+    int  (*getwidth)(FAR struct stm32_tim_dev_s *dev);
+    int  (*setchannel)(FAR struct stm32_tim_dev_s *dev, uint8_t channel,
+                       stm32_tim_channel_t mode);
+    int  (*setcompare)(FAR struct stm32_tim_dev_s *dev, uint8_t channel,
+                       uint32_t compare);
+    int  (*getcapture)(FAR struct stm32_tim_dev_s *dev, uint8_t channel);
 
-  /* Timer interrupts */
+    /* Timer interrupts */
 
-  int  (*setisr)(FAR struct stm32_tim_dev_s *dev, xcpt_t handler, void * arg, int source);
-  void (*enableint)(FAR struct stm32_tim_dev_s *dev, int source);
-  void (*disableint)(FAR struct stm32_tim_dev_s *dev, int source);
-  void (*ackint)(FAR struct stm32_tim_dev_s *dev, int source);
-  int  (*checkint)(FAR struct stm32_tim_dev_s *dev, int source);
+    int  (*setisr)(FAR struct stm32_tim_dev_s *dev, xcpt_t handler, void * arg, int source);
+    void (*enableint)(FAR struct stm32_tim_dev_s *dev, int source);
+    void (*disableint)(FAR struct stm32_tim_dev_s *dev, int source);
+    void (*ackint)(FAR struct stm32_tim_dev_s *dev, int source);
+    int  (*checkint)(FAR struct stm32_tim_dev_s *dev, int source);
+    // <YS>
+    int (*prioritize)(FAR struct stm32_tim_dev_s *dev, uint32_t prio);
+    void (*sp_putreg16)(FAR struct stm32_tim_dev_s *dev, uint8_t offset,
+                        uint16_t value);
+    uint16_t (*sp_getreg16)(FAR struct stm32_tim_dev_s *dev,
+                            uint8_t offset);
+    void (*sp_modreg16)(FAR struct stm32_tim_dev_s *dev,
+                           uint8_t offset, uint16_t clearbits,
+                           uint16_t setbits);
 };
 
+
+
+
 /************************************************************************************
- * Public Functions
- ************************************************************************************/
+* Public Functions
+************************************************************************************/
 
 /* Power-up timer and get its structure */
 
@@ -198,21 +216,21 @@ FAR struct stm32_tim_dev_s *stm32_tim_init(int timer);
 int stm32_tim_deinit(FAR struct stm32_tim_dev_s *dev);
 
 /****************************************************************************
- * Name: stm32_timer_initialize
- *
- * Description:
- *   Bind the configuration timer to a timer lower half instance and
- *   register the timer drivers at 'devpath'
- *
- * Input Parameters:
- *   devpath - The full path to the timer device. This should be of the form /dev/timer0
- *   timer - the timer number.
- *
- * Returned Value:
- *   Zero (OK) is returned on success; A negated errno value is returned
- *   to indicate the nature of any failure.
- *
- ****************************************************************************/
+* Name: stm32_timer_initialize
+*
+* Description:
+*   Bind the configuration timer to a timer lower half instance and
+*   register the timer drivers at 'devpath'
+*
+* Input Parameters:
+*   devpath - The full path to the timer device. This should be of the form /dev/timer0
+*   timer - the timer number.
+*
+* Returned Value:
+*   Zero (OK) is returned on success; A negated errno value is returned
+*   to indicate the nature of any failure.
+*
+****************************************************************************/
 
 #ifdef CONFIG_TIMER
 int stm32_timer_initialize(FAR const char *devpath, int timer);

@@ -357,7 +357,6 @@ int open(FAR const char *path, int oflags, ...)
       set_errno(-fd);
       fd = ERROR;
     }
-
   leave_cancellation_point();
   return fd;
 }

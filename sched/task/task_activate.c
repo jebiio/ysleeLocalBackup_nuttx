@@ -73,10 +73,10 @@ void nxtask_activate(FAR struct tcb_s *tcb)
   /* Inform the instrumentation layer that the task
    * has started
    */
-
-  sched_note_start(tcb);
+    
+    sched_note_start(tcb);
 #endif
-
+  
   up_unblock_task(tcb);
   leave_critical_section(flags);
 }

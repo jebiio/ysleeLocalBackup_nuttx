@@ -139,9 +139,9 @@ int up_create_stack(FAR struct tcb_s *tcb, size_t stack_size, uint8_t ttype)
       up_release_stack(tcb, ttype);
     }
 
-  /* Do we need to allocate a new stack? */
+    /* Do we need to allocate a new stack? */
 
-  if (!tcb->stack_alloc_ptr)
+    if (!tcb->stack_alloc_ptr)
     {
       /* Allocate the stack.  If DEBUG is enabled (but not stack debug),
        * then create a zeroed stack to make stack dumps easier to trace.
@@ -154,6 +154,7 @@ int up_create_stack(FAR struct tcb_s *tcb, size_t stack_size, uint8_t ttype)
 
       if (ttype == TCB_FLAG_TTYPE_KERNEL)
         {
+
           tcb->stack_alloc_ptr =
             (uint32_t *)kmm_memalign(TLS_STACK_ALIGN, alloc_size);
         }
@@ -172,6 +173,7 @@ int up_create_stack(FAR struct tcb_s *tcb, size_t stack_size, uint8_t ttype)
 
       if (ttype == TCB_FLAG_TTYPE_KERNEL)
         {
+
           tcb->stack_alloc_ptr =
               (uint32_t *)kmm_memalign(CONFIG_STACK_ALIGNMENT, alloc_size);
         }
@@ -189,9 +191,9 @@ int up_create_stack(FAR struct tcb_s *tcb, size_t stack_size, uint8_t ttype)
       /* Was the allocation successful? */
 
       if (!tcb->stack_alloc_ptr)
-        {
-          serr("ERROR: Failed to allocate stack, size %d\n", stack_size);
-        }
+      {
+        serr("ERROR: Failed to allocate stack, size %d\n", stack_size);
+      }
 #endif
     }
 
@@ -234,5 +236,5 @@ int up_create_stack(FAR struct tcb_s *tcb, size_t stack_size, uint8_t ttype)
       return OK;
     }
 
-  return ERROR;
+    return ERROR;
 }

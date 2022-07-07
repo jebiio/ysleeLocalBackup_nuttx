@@ -4568,6 +4568,7 @@ errout:
   return ret;
 }
 
+//<YS>
 /****************************************************************************
  * Name: pwm_ioctl
  *
@@ -4587,14 +4588,391 @@ errout:
 static int pwm_ioctl(FAR struct pwm_lowerhalf_s *dev, int cmd,
                      unsigned long arg)
 {
-#ifdef CONFIG_DEBUG_PWM_INFO
   FAR struct stm32_pwmtimer_s *priv = (FAR struct stm32_pwmtimer_s *)dev;
+  int ret = OK;
 
-  /* There are no platform-specific ioctl commands */
+  switch (cmd)
+  {
+  case SP_init_timer1:
+  {
+    FAR const struct arg_pwm_init *_arg = (FAR const struct arg_pwm_init *)((uintptr_t)arg);
+    uint16_t outputs = 0;
+    uint16_t reg16 = 0;
+    /* NOTE: leave timer counter disabled and all outputs disabled! */
 
-  pwminfo("TIM%u\n", priv->timid);
-#endif
-  return -ENOTTY;
+    /* <YS> reset */
+
+    pwm_modifyreg(priv, STM32_RCC_APB2RSTR_OFFSET, 0, RCC_APB2RSTR_TIM1RST);
+    pwm_modifyreg(priv, STM32_RCC_APB2RSTR_OFFSET, RCC_APB2RSTR_TIM1RST, 0);
+
+    /* Get configured outputs */
+
+    outputs = pwm_outputs_from_channels(priv);
+
+    /* Disable outputs */
+
+    ret = pwm_outputs_enable(dev, outputs, false);
+    if (ret < 0)
+    {
+      goto errout;
+    }
+
+    /* Disable the timer until we get it configured */
+
+    pwm_timer_enable(dev, false);
+
+    /* ARR */
+    reg16 = _arg->ARR;
+    pwm_arr_update(dev, reg16);
+
+    /* CR1 */
+    reg16 = 0;
+    pwm_putreg(priv, STM32_ATIM_CR1_OFFSET, reg16);
+
+    /* CR2 */
+    reg16 = 0;
+    pwm_putreg(priv, STM32_ATIM_CR2_OFFSET, reg16);
+
+    /* CCMR1 */
+    reg16 = 0;
+    reg16 |= ATIM_CCMR1_OC1PE;
+    reg16 |= (ATIM_CCMR_MODE_PWM1 << ATIM_CCMR1_OC1M_SHIFT);
+    reg16 |= ATIM_CCMR1_OC2PE;
+    reg16 |= (ATIM_CCMR_MODE_PWM1 << ATIM_CCMR1_OC2M_SHIFT);
+    pwm_putreg(priv, STM32_ATIM_CCMR1_OFFSET, reg16);
+
+    /* CCMR2 */
+    reg16 = 0;
+    reg16 |= ATIM_CCMR2_OC3PE;
+    reg16 |= (ATIM_CCMR_MODE_PWM1 << ATIM_CCMR2_OC3M_SHIFT);
+    pwm_putreg(priv, STM32_ATIM_CCMR2_OFFSET, reg16);
+
+    /* CCER */
+    reg16 = 0;
+    pwm_putreg(priv, STM32_ATIM_CCER_OFFSET, reg16);
+
+    /* BDTR */
+    reg16 = 0;
+    reg16 |= (ATIM_BDTR_AOE | ATIM_BDTR_MOE);
+    reg16 |= (_arg->dead_time_ticks << ATIM_BDTR_DTG_SHIFT);
+    /* Write BDTR register at once */
+    pwm_putreg(priv, STM32_ATIM_BDTR_OFFSET, reg16);
+
+    /* EGR */
+    reg16 = 0;
+    reg16 |= (GTIM_EGR_UG | GTIM_EGR_COMG);
+    pwm_putreg(priv, STM32_ATIM_EGR_OFFSET, reg16);
+
+    break;
+    }
+
+    case SP_init_timer2:
+    {
+      FAR const struct arg_pwm_init *_arg = (FAR const struct arg_pwm_init *)((uintptr_t)arg);
+      uint16_t outputs = 0;
+      uint16_t reg16 = 0;
+      /* NOTE: leave timer counter disabled and all outputs disabled! */
+
+      // <YS> reset
+
+      pwm_modifyreg(priv, STM32_RCC_APB1RSTR_OFFSET, 0, RCC_APB1RSTR_TIM2RST);
+      pwm_modifyreg(priv, STM32_RCC_APB1RSTR_OFFSET, RCC_APB1RSTR_TIM2RST, 0);
+
+      /* Get configured outputs */
+
+      outputs = pwm_outputs_from_channels(priv);
+
+      /* Disable outputs */
+
+      ret = pwm_outputs_enable(dev, outputs, false);
+      if (ret < 0)
+      {
+        goto errout;
+      }
+
+      /* Disable the timer until we get it configured */
+
+      pwm_timer_enable(dev, false);
+
+      /* ARR */
+      reg16 = _arg->ARR;
+      pwm_arr_update(dev, reg16);
+
+      /* CR1 */
+      reg16 = 0;
+      pwm_putreg(priv, STM32_GTIM_CR1_OFFSET, reg16);
+
+      /* CCMR1 */
+      reg16 = 0;
+      reg16 |= ATIM_CCMR1_OC2PE;
+      reg16 |= (ATIM_CCMR_MODE_PWM2 << ATIM_CCMR1_OC2M_SHIFT);
+      pwm_putreg(priv, STM32_GTIM_CCMR1_OFFSET, reg16);
+
+      /* CCER */
+      reg16 = 0;
+      reg16 |= GTIM_CCER_CC2E;
+      pwm_putreg(priv, STM32_GTIM_CCER_OFFSET, reg16);
+
+      /* CCR2 */
+      reg16 = _arg->CCR2;
+      pwm_putreg(priv, STM32_GTIM_CCR2_OFFSET, reg16);
+
+      /* EGR */
+      reg16 = 0;
+      reg16 |= (GTIM_EGR_UG | GTIM_EGR_COMG);
+      pwm_putreg(priv, STM32_GTIM_EGR_OFFSET, reg16);
+
+      break;
+    }
+
+    case SP_getreg:
+    {
+      FAR struct arg_pwm_reg *reg = (FAR struct arg_pwm_reg *)((uintptr_t)arg);
+
+      irqstate_t flags = enter_critical_section();
+      reg->value = pwm_getreg(priv, reg->offset);
+      leave_critical_section(flags);
+
+      break;
+    }
+
+    case SP_putreg:
+    {
+      FAR const struct arg_pwm_reg *reg = (FAR const struct arg_pwm_reg *)((uintptr_t)arg);
+
+      irqstate_t flags = enter_critical_section();
+      pwm_putreg(priv, reg->offset, reg->value);
+      leave_critical_section(flags);
+
+      break;
+    }
+
+    case SP_modifyreg:
+    {
+      FAR const struct arg_pwm_reg *reg = (FAR const struct arg_pwm_reg *)((uintptr_t)arg);
+
+      pwm_modifyreg(priv, reg->offset, reg->clearbits, reg->setbits);
+
+      break;
+    }
+
+    case SP_outputs_enable:
+    {
+      FAR const struct arg_pwm_output *output = (FAR const struct arg_pwm_output *)((uintptr_t)arg);
+
+      pwm_outputs_enable(dev, output->outputs, output->state);
+
+      break;
+    }
+
+    case SP_ccr_update:
+    {
+      FAR const struct arg_pwm_reg1 *ccr = (FAR const struct arg_pwm_reg1 *)((uintptr_t)arg);
+
+      pwm_ccr_update(dev, ccr->index, ccr->value);
+
+      break;
+    }
+
+    default:
+    {
+      aerr("ERROR: Unknown cmd: %d\n", cmd);
+      ret = -ENOTTY;
+      break;
+    }
+
+    case SP_preackint:
+    {
+      int *regvalue = (int *)arg;
+      uint16_t sr, dier;
+
+      sr = pwm_getreg(priv, STM32_GTIM_SR_OFFSET);
+      dier = pwm_getreg(priv, STM32_GTIM_DIER_OFFSET);
+
+      if ((sr & GTIM_SR_CC1IF) && (dier & GTIM_DIER_CC1IE))
+      {
+        *regvalue = 1;
+      }
+      else
+      {
+        *regvalue = 0;
+        printf("motor_timer.c : CC1IntFlag isn't enabled and set in TIM4 isr\n");
+      }
+
+      break;
+    }
+
+    case SP_checkDisable:
+    {
+
+      uint16_t cr1;
+
+      cr1 = pwm_getreg(priv, STM32_ATIM_CR1_OFFSET);
+      assert(!(cr1 & ATIM_CR1_CEN));
+
+      break;
+    }
+
+    case SP_checkEnable:
+    {
+
+      uint16_t cr1;
+
+      cr1 = pwm_getreg(priv, STM32_ATIM_CR1_OFFSET);
+      assert((cr1 & ATIM_CR1_CEN));
+
+      break;
+    }
+
+    case SP_setMaster:
+    {
+      pwm_modifyreg(priv, STM32_ATIM_CR2_OFFSET, 0, ATIM_CR2_MMS_ENABLE);
+
+      break;
+    }
+
+    case SP_setSlave:
+    {
+      pwm_putreg(priv, STM32_GTIM_SMCR_OFFSET, ATIM_SMCR_TRIGGER);
+
+      break;
+    }
+
+    case SP_startAll:
+    {
+      pwm_modifyreg(priv, STM32_GTIM_CR1_OFFSET, 0, ATIM_CR1_CEN);
+      
+      break;
+    }
+
+    case SP_setTim1Trig:
+    {
+      pwm_modifyreg(priv, STM32_ATIM_CR2_OFFSET, ATIM_CR2_MMS_MASK, 0);
+
+      break;
+    }
+
+    case SP_setTim2Trig:
+    {
+      pwm_putreg(priv, STM32_GTIM_SMCR_OFFSET, GTIM_SMCR_RESET);
+
+      break;
+    }
+
+    case SP_phase_reset_all_i:
+    {
+      pwm_putreg(priv, STM32_ATIM_CCER_OFFSET, 0);
+      pwm_modifyreg(priv, STM32_ATIM_CCMR1_OFFSET,
+                    ATIM_CCMR1_OC1M_MASK | ATIM_CCMR1_OC2M_MASK, 0);
+      pwm_modifyreg(priv, STM32_ATIM_CCMR2_OFFSET,
+                    ATIM_CCMR2_OC3M_MASK, 0);
+      pwm_putreg(priv, STM32_ATIM_CCR1_OFFSET, (uint16_t)arg);
+      pwm_putreg(priv, STM32_ATIM_CCR2_OFFSET, (uint16_t)arg);
+      pwm_putreg(priv, STM32_ATIM_CCR3_OFFSET, (uint16_t)arg);
+      pwm_putreg(priv, STM32_ATIM_EGR_OFFSET, ATIM_EGR_COMG);
+
+      break;
+    }
+
+    case SP_phase_reset_i:
+    {
+      if (arg == 0)
+      {
+        pwm_outputs_enable(dev,
+                           (uint16_t)STM32_PWM_OUT1 | STM32_PWM_OUT1N,
+                           (bool)false);
+        pwm_modifyreg(priv, STM32_ATIM_CCMR1_OFFSET,
+                      ATIM_CCMR1_OC1M_MASK, 0);
+      }
+      else if (arg == 1)
+      {
+        pwm_outputs_enable(dev,
+                           (uint16_t)STM32_PWM_OUT2 | STM32_PWM_OUT2N,
+                           (bool)false);
+        pwm_modifyreg(priv, STM32_ATIM_CCMR1_OFFSET,
+                      ATIM_CCMR1_OC2M_MASK, 0);
+      }
+      else
+      {
+        pwm_outputs_enable(dev,
+                           (uint16_t)STM32_PWM_OUT3 | STM32_PWM_OUT3N,
+                           (bool)false);
+        pwm_modifyreg(priv, STM32_ATIM_CCMR2_OFFSET,
+                      ATIM_CCMR2_OC3M_MASK, 0);
+      }
+      break;
+    }
+
+    case SP_phase_set_i:
+    {
+      struct arg_pwm_phase_set_i *_arg = (struct arg_pwm_phase_set_i *)arg;
+
+      if(_arg->phase == 0)
+      {
+        pwm_ccr_update(dev, STM32_ATIM_CCR1_OFFSET, _arg->pwm_val);
+        if(_arg->inverted)
+        {
+          pwm_modifyreg(priv, STM32_ATIM_CCMR1_OFFSET,
+                        ATIM_CCMR1_OC1M_MASK,
+                        (ATIM_CCMR_MODE_PWM2 << ATIM_CCMR1_OC1M_SHIFT));
+        }
+        else
+        {
+          pwm_modifyreg(priv, STM32_ATIM_CCMR1_OFFSET,
+                        ATIM_CCMR1_OC1M_MASK,
+                        (ATIM_CCMR_MODE_PWM1 << ATIM_CCMR1_OC1M_SHIFT));
+        }
+        pwm_outputs_enable(dev,
+                           STM32_PWM_OUT1 | STM32_PWM_OUT1N,
+                           true);
+      }
+      else if(_arg->phase == 1)
+      {
+        pwm_ccr_update(dev, STM32_ATIM_CCR2_OFFSET, _arg->pwm_val);
+        if (_arg->inverted)
+        {
+          pwm_modifyreg(priv, STM32_ATIM_CCMR1_OFFSET,
+                        ATIM_CCMR1_OC2M_MASK,
+                        (ATIM_CCMR_MODE_PWM2 << ATIM_CCMR1_OC1M_SHIFT));
+        }
+        else
+        {
+          pwm_modifyreg(priv, STM32_ATIM_CCMR1_OFFSET,
+                        ATIM_CCMR1_OC2M_MASK,
+                        (ATIM_CCMR_MODE_PWM1 << ATIM_CCMR1_OC1M_SHIFT));
+        }
+        pwm_outputs_enable(dev,
+                           STM32_PWM_OUT2 | STM32_PWM_OUT2N,
+                           true);
+      }
+      else
+      {
+        pwm_ccr_update(dev, STM32_ATIM_CCR3_OFFSET, _arg->pwm_val);
+        if (_arg->inverted)
+        {
+          pwm_modifyreg(priv, STM32_ATIM_CCMR2_OFFSET,
+                        ATIM_CCMR2_OC3M_MASK,
+                        (ATIM_CCMR_MODE_PWM2 << ATIM_CCMR1_OC1M_SHIFT));
+        }
+        else
+        {
+          pwm_modifyreg(priv, STM32_ATIM_CCMR2_OFFSET,
+                        ATIM_CCMR2_OC3M_MASK,
+                        (ATIM_CCMR_MODE_PWM1 << ATIM_CCMR1_OC1M_SHIFT));
+        }
+        pwm_outputs_enable(dev,
+                           STM32_PWM_OUT2 | STM32_PWM_OUT2N,
+                           true);
+      }
+    }
+
+    case SP_updateCCR2:
+    {
+      pwm_ccr_update(dev, STM32_GTIM_CCR2_OFFSET, (uint16_t)arg);
+    }
+  }
+errout:
+  return ret;
 }
 
 /****************************************************************************
@@ -4625,149 +5003,149 @@ FAR struct pwm_lowerhalf_s *stm32_pwminitialize(int timer)
   pwminfo("TIM%u\n", timer);
 
   switch (timer)
-    {
+  {
 #ifdef CONFIG_STM32_TIM1_PWM
-      case 1:
-        {
-          lower = &g_pwm1dev;
+  case 1:
+  {
+    lower = &g_pwm1dev;
 
-          /* Attach but disable the TIM1 update interrupt */
+    /* Attach but disable the TIM1 update interrupt */
 
 #ifdef CONFIG_PWM_PULSECOUNT
-          irq_attach(lower->irq, pwm_tim1interrupt, NULL);
-          up_disable_irq(lower->irq);
+    irq_attach(lower->irq, pwm_tim1interrupt, NULL);
+    up_disable_irq(lower->irq);
 #endif
-          break;
-        }
+    break;
+  }
 #endif
 
 #ifdef CONFIG_STM32_TIM2_PWM
-      case 2:
-        {
-          lower = &g_pwm2dev;
-          break;
-        }
+  case 2:
+  {
+    lower = &g_pwm2dev;
+    break;
+  }
 #endif
 
 #ifdef CONFIG_STM32_TIM3_PWM
-      case 3:
-        {
-          lower = &g_pwm3dev;
-          break;
-        }
+  case 3:
+  {
+    lower = &g_pwm3dev;
+    break;
+  }
 #endif
 
 #ifdef CONFIG_STM32_TIM4_PWM
-      case 4:
-        {
-          lower = &g_pwm4dev;
-          break;
-        }
+  case 4:
+  {
+    lower = &g_pwm4dev;
+    break;
+  }
 #endif
 
 #ifdef CONFIG_STM32_TIM5_PWM
-      case 5:
-        {
-          lower = &g_pwm5dev;
-          break;
-        }
+  case 5:
+  {
+    lower = &g_pwm5dev;
+    break;
+  }
 #endif
 
 #ifdef CONFIG_STM32_TIM8_PWM
-      case 8:
-        {
-          lower = &g_pwm8dev;
+  case 8:
+  {
+    lower = &g_pwm8dev;
 
-          /* Attach but disable the TIM8 update interrupt */
+    /* Attach but disable the TIM8 update interrupt */
 
 #ifdef CONFIG_PWM_PULSECOUNT
-          irq_attach(lower->irq, pwm_tim8interrupt, NULL);
-          up_disable_irq(lower->irq);
+    irq_attach(lower->irq, pwm_tim8interrupt, NULL);
+    up_disable_irq(lower->irq);
 #endif
-          break;
-        }
+    break;
+  }
 #endif
 
 #ifdef CONFIG_STM32_TIM9_PWM
-      case 9:
-        {
-          lower = &g_pwm9dev;
-          break;
-        }
+  case 9:
+  {
+    lower = &g_pwm9dev;
+    break;
+  }
 #endif
 
 #ifdef CONFIG_STM32_TIM10_PWM
-      case 10:
-        {
-          lower = &g_pwm10dev;
-          break;
-        }
+  case 10:
+  {
+    lower = &g_pwm10dev;
+    break;
+  }
 
 #endif
 
 #ifdef CONFIG_STM32_TIM11_PWM
-      case 11:
-        {
-          lower = &g_pwm11dev;
-          break;
-        }
+  case 11:
+  {
+    lower = &g_pwm11dev;
+    break;
+  }
 #endif
 
 #ifdef CONFIG_STM32_TIM12_PWM
-      case 12:
-        {
-          lower = &g_pwm12dev;
-          break;
-        }
+  case 12:
+  {
+    lower = &g_pwm12dev;
+    break;
+  }
 #endif
 
 #ifdef CONFIG_STM32_TIM13_PWM
-      case 13:
-        {
-          lower = &g_pwm13dev;
-          break;
-        }
+  case 13:
+  {
+    lower = &g_pwm13dev;
+    break;
+  }
 #endif
 
 #ifdef CONFIG_STM32_TIM14_PWM
-      case 14:
-        {
-          lower = &g_pwm14dev;
-          break;
-        }
+  case 14:
+  {
+    lower = &g_pwm14dev;
+    break;
+  }
 #endif
 
 #ifdef CONFIG_STM32_TIM15_PWM
-      case 15:
-        {
-          lower = &g_pwm15dev;
-          break;
-        }
+  case 15:
+  {
+    lower = &g_pwm15dev;
+    break;
+  }
 #endif
 
 #ifdef CONFIG_STM32_TIM16_PWM
-      case 16:
-        {
-          lower = &g_pwm16dev;
-          break;
-        }
+  case 16:
+  {
+    lower = &g_pwm16dev;
+    break;
+  }
 #endif
 
 #ifdef CONFIG_STM32_TIM17_PWM
-      case 17:
-        {
-          lower = &g_pwm17dev;
-          break;
-        }
+  case 17:
+  {
+    lower = &g_pwm17dev;
+    break;
+  }
 #endif
 
-      default:
-        {
-          pwmerr("ERROR: No such timer configured %d\n", timer);
-          lower = NULL;
-          goto errout;
-        }
-    }
+  default:
+  {
+    pwmerr("ERROR: No such timer configured %d\n", timer);
+    lower = NULL;
+    goto errout;
+  }
+  }
 
 errout:
   return (FAR struct pwm_lowerhalf_s *)lower;

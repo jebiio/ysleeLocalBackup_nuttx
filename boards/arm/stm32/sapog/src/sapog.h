@@ -47,6 +47,13 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+//<YS>
+/* PWM Configuration */
+
+#define SAPOG_PWMTIMER1   1
+#define SAPOG_PWMTIMER2   2
+#define SAPOG_PWMTIMER3   3
+
 /* Configuration ****************************************************************************/
 /* How many SPI modules does this chip support? */
 
@@ -514,6 +521,39 @@ int stm32_sdinitialize(int minor);
 
 #ifdef CONFIG_MTD_W25
 int stm32_w25initialize(int minor);
+#endif
+
+/****************************************************************************
+ * Name: stm32_pwm_setup
+ *
+ * Description:
+ *   Initialize PWM and register the PWM device.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_PWM
+int stm32_pwm_setup(void);
+#endif
+
+/****************************************************************************
+ * Name: stm32_timer_driver_setup
+ *
+ * Description:
+ *   Configure the timer driver.
+ *
+ * Input Parameters:
+ *   devpath - The full path to the timer device.  This should be of the
+ *             form /dev/timer0
+ *   timer   - The timer's number.
+ *
+ * Returned Values:
+ *   Zero (OK) is returned on success; A negated errno value is returned
+ *   to indicate the nature of any failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_TIMER
+int stm32_timer_driver_setup(FAR const char *devpath, int timer);
 #endif
 
 #endif /* __ASSEMBLY__ */

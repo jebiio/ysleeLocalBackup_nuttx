@@ -131,7 +131,6 @@ int nx_close(int fd)
 int close(int fd)
 {
   int ret;
-
   /* close() is a cancellation point */
 
   enter_cancellation_point();

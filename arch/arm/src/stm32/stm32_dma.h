@@ -357,3 +357,7 @@ uint8_t  stm32_dma_intget(unsigned int controller, uint8_t stream);
 
 #endif /* __ASSEMBLY__ */
 #endif /* __ARCH_ARM_SRC_STM32_STM32_DMA_H */
+
+// <YS>
+void dmachan_putreg_wrapper(DMA_HANDLE handle, uint32_t offset,
+                            uint32_t value);

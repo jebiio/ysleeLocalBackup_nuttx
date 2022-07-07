@@ -481,7 +481,7 @@ static int pwm_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
        *   characteristics of the pulsed output.
        */
 
-      case PWMIOC_GETCHARACTERISTICS:
+        case PWMIOC_GETCHARACTERISTICS:
         {
           FAR struct pwm_info_s *info =
             (FAR struct pwm_info_s *)((uintptr_t)arg);
@@ -493,13 +493,13 @@ static int pwm_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         }
         break;
 
-      /* PWMIOC_START - Start the pulsed output.  The
+          /* PWMIOC_START - Start the pulsed output.  The
        *   PWMIOC_SETCHARACTERISTICS  command must have previously been sent.
        *
        *   ioctl argument:  None
        */
 
-      case PWMIOC_START:
+        case PWMIOC_START:
         {
           pwm_dump("PWMIOC_START", &upper->info, upper->started);
           DEBUGASSERT(lower->ops->start != NULL);
@@ -542,7 +542,18 @@ static int pwm_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         {
           pwminfo("Forwarding unrecognized cmd: %d arg: %ld\n", cmd, arg);
           DEBUGASSERT(lower->ops->ioctl != NULL);
-          ret = lower->ops->ioctl(lower, cmd, arg);
+
+          // <YS>
+          if (cmd == SP_setSlave)
+          {
+            upper->started = true;
+          }
+          if (cmd == SP_setSlave)
+          {
+            upper->started = true;
+          }
+            ret = lower->ops->ioctl(lower, cmd, arg);
+
         }
         break;
     }

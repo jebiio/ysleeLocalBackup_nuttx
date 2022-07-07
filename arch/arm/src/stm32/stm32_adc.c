@@ -671,7 +671,7 @@ static const struct stm32_adc_ops_s g_adc_llops =
   .stime_set     = adc_sampletime_set,
   .stime_write   = adc_sampletime_write,
 #  endif
-  .dump_regs     = adc_llops_dumpregs
+  .dump_regs     = adc_llops_dumpregs,
 };
 #endif
 
@@ -3777,7 +3777,9 @@ static int adc_ioctl(FAR struct adc_dev_s *dev, int cmd, unsigned long arg)
 {
   FAR struct stm32_dev_s *priv = (FAR struct stm32_dev_s *)dev->ad_priv;
   int ret                      = OK;
-
+  
+  printf("<YS> cmd : %d", cmd);
+  
   switch (cmd)
     {
       case ANIOC_TRIGGER:
@@ -3910,6 +3912,163 @@ static int adc_ioctl(FAR struct adc_dev_s *dev, int cmd, unsigned long arg)
 #endif
 
           adc_reg_startconv(priv, true);
+          break;
+        }
+
+        case IO_RESET:
+        {
+          
+          priv->initialized = 0;
+          modifyreg32(STM32_RCC_APB2ENR, 0, RCC_APB2ENR_ADC1EN | RCC_APB2ENR_ADC2EN);
+          modifyreg32(STM32_RCC_RSTR, 0, RCC_APB2RSTR_ADC1RST | RCC_APB2RSTR_ADC2RST);
+          modifyreg32(STM32_RCC_RSTR, RCC_APB2RSTR_ADC1RST | RCC_APB2RSTR_ADC2RST, 0);
+
+          break;
+        }
+
+        case IO_SETUP_DMA:
+        {
+          
+          struct dma_config* _arg = (struct dma_config *)arg;
+          uint16_t reg16 = 0;
+          
+          if (priv->dma != NULL)
+          {
+            stm32_dmastop(priv->dma);
+            stm32_dmafree(priv->dma);
+          }
+          priv->dma = stm32_dmachannel(priv->dmachan);
+          printf("\n<YS> priv->dmachan : %x, priv->dma : %x\n", priv->dmachan, priv->dma);
+          reg16 = 0;
+          
+          dmachan_putreg_wrapper(priv->dma, STM32_DMACHAN_CCR_OFFSET, reg16);
+          
+          dmachan_putreg_wrapper(priv->dma, STM32_DMACHAN_CMAR_OFFSET, _arg->cmar);
+
+          dmachan_putreg_wrapper(priv->dma, STM32_DMACHAN_CNDTR_OFFSET, _arg->cndtr);
+
+          dmachan_putreg_wrapper(priv->dma, STM32_DMACHAN_CPAR_OFFSET,
+                         (uint32_t)(priv->base + STM32_ADC_DR_OFFSET));
+
+          reg16 = 
+          DMA_CCR_PRIVERYHI |        // Max priority
+              DMA_CCR_MSIZE_32BITS | // 32 bit
+              DMA_CCR_MSIZE_32BITS | // 32 bit
+              DMA_CCR_MINC |
+              DMA_CCR_CIRC |
+              DMA_CCR_EN;
+          dmachan_putreg_wrapper(priv->dma, STM32_DMACHAN_CCR_OFFSET, reg16);
+          printf("<YS> break\n");
+          break;
+        }
+
+        case IO_ENABLE:
+        {
+          adc_modifyreg(priv, STM32_ADC_CR2_OFFSET, 0, ADC_CR2_ADON);
+
+          break;
+        }
+
+        case IO_CALIB:
+        {
+          adc_calibrate(priv);
+
+          break;
+        }
+
+        case IO_SETUP_ADC1_SQR:
+        {
+          uint32_t reg32 = 0;
+
+          reg32 = 0x03 << ADC_SQR1_L_SHIFT;
+          adc_putreg(priv, STM32_ADC_SQR1_OFFSET, reg32);
+
+          reg32 = (0x04 << ADC_SQR3_SQ1_SHIFT) |
+                  (0x01 << ADC_SQR3_SQ2_SHIFT) |
+                  (0x01 << ADC_SQR3_SQ3_SHIFT) |
+                  (0x03 << ADC_SQR3_SQ4_SHIFT);
+          adc_putreg(priv, STM32_ADC_SQR3_OFFSET, reg32);
+
+          break;
+        }
+
+        case IO_SETUP_ADC1:
+        {
+          uint32_t reg32 = 0;
+
+          reg32 = ADC_CR1_RS | ADC_CR1_SCAN | ADC_CR1_EOCIE;
+          adc_putreg(priv, STM32_ADC_CR1_OFFSET, reg32);
+
+          reg32 = ADC_CR2_ADON | ADC_CR2_EXTTRIG | ADC_CR2_EXTSEL_T2CC2 | ADC_CR2_DMA;
+          adc_putreg(priv, STM32_ADC_CR2_OFFSET, reg32);
+
+          priv->initialized += 1;
+
+          break;
+        }
+
+        case IO_SETUP_ADC2_SQR:
+        {
+          uint32_t reg32 = 0;
+
+          reg32 = 0x03 << ADC_SQR1_L_SHIFT;
+          adc_putreg(priv, STM32_ADC_SQR1_OFFSET, reg32);
+
+          reg32 = (0x05 << ADC_SQR3_SQ1_SHIFT) |
+                  (0x03 << ADC_SQR3_SQ2_SHIFT) |
+                  (0x03 << ADC_SQR3_SQ3_SHIFT) |
+                  (0x02 << ADC_SQR3_SQ4_SHIFT);
+          adc_putreg(priv, STM32_ADC_SQR3_OFFSET, reg32);
+
+          break;
+        }
+
+        case IO_SETUP_ADC2:
+        {
+          uint32_t reg32 = 0;
+
+          reg32 = ADC_CR1_RS | ADC_CR1_SCAN;
+          adc_putreg(priv, STM32_ADC_CR1_OFFSET, reg32);
+
+          reg32 = ADC_CR2_ADON | ADC_CR2_EXTTRIG | ADC_CR2_EXTSEL_SWSTART;
+          adc_putreg(priv, STM32_ADC_CR2_OFFSET, reg32);
+
+          priv->initialized += 1;
+
+          break;
+        }
+
+        case nvicEnableVector:
+        {
+          struct adc_isr* _adcIsr = (struct adc_isr*)arg;
+
+          up_prioritize_irq(STM32_IRQ_ADC12, _adcIsr->prio);
+          adc_intack((struct stm32_adc_dev_s *)priv, ADC_ISR_ALLINTS);
+          irq_attach(STM32_IRQ_ADC12, _adcIsr->isrAddr, priv); 
+          up_enable_irq(STM32_IRQ_ADC12);
+
+          break;
+        }
+
+        case enable_from_isr:
+        {
+          adc_putreg(priv, STM32_ADC_SR_OFFSET, 0);
+          adc_modifyreg(priv, STM32_ADC_CR1_OFFSET, 0, ADC_CR1_EOCIE);
+
+          break;
+        }
+
+        case disable_from_isr:
+        {
+          adc_modifyreg(priv, STM32_ADC_CR1_OFFSET, ADC_CR1_EOCIE, 0);
+
+          break;
+        }
+
+        case put_SR_0:
+        {
+          adc_putreg(priv, STM32_ADC_SR_OFFSET, 0);
+
           break;
         }
 

@@ -60,6 +60,9 @@
 #include <nuttx/spi/spi.h>
 #include <nuttx/i2c/i2c_master.h>
 
+// <YS>
+#include <nuttx/irq.h>
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -85,6 +88,8 @@
 #define ADC_SHUTDOWN(dev)      ((dev)->ad_ops->ao_shutdown((dev)))
 #define ADC_RXINT(dev)         ((dev)->ad_ops->ao_rxint((dev)))
 #define ADC_IOCTL(dev,cmd,arg) ((dev)->ad_ops->ao_ioctl((dev),(cmd),(arg)))
+
+
 
 /****************************************************************************
  * Public Types
@@ -208,6 +213,20 @@ struct adc_dev_s
 
   FAR const struct adc_ops_s *ad_ops;        /* Arch-specific operations */
   FAR void                   *ad_priv;       /* Used by the arch-specific logic */
+};
+
+// <YS>
+
+struct dma_config
+{
+  uint32_t cmar;
+  uint16_t cndtr;
+};
+
+struct adc_isr
+{
+  xcpt_t isrAddr;
+  uint32_t prio;
 };
 
 /****************************************************************************

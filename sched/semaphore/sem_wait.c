@@ -214,11 +214,10 @@ int nxsem_wait(FAR sem_t *sem)
 int nxsem_wait_uninterruptible(FAR sem_t *sem)
 {
   int ret;
-
   do
     {
       /* Take the semaphore (perhaps waiting) */
-
+      
       ret = nxsem_wait(sem);
     }
   while (ret == -EINTR);

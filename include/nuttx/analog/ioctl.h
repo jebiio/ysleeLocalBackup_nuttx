@@ -65,6 +65,21 @@
                                            * IN: Threshold value
                                            * OUT: None */
 
+#define IO_RESET _ANIOC(0x0004)
+#define IO_SETUP_DMA _ANIOC(0x0005) // 2821
+#define IO_ENABLE _ANIOC(0x0006)
+#define IO_CALIB _ANIOC(0x0007)
+#define IO_SETUP_ADC1_SQR _ANIOC(0x0008)
+#define IO_SETUP_ADC2_SQR _ANIOC(0x0009)
+#define IO_SETISR _ANIOC(0x0000A)
+#define enable_from_isr _ANIOC(0x0000B)
+#define disable_from_isr _ANIOC(0x0000C)
+#define put_SR_0 _ANIOC(0x0000D)
+#define IO_SETUP_ADC1 _ANIOC(0x000E)
+#define IO_SETUP_ADC2 _ANIOC(0x000F)
+#define IO_SETPRIORITY _ANIOC(0x0010)
+#define nvicEnableVector _ANIOC(0x0011)
+
 #define AN_FIRST          0x0001          /* First common command */
 #define AN_NCMDS          3               /* Number of common commands */
 

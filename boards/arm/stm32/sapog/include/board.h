@@ -45,6 +45,7 @@
 #ifndef __ASSEMBLY__
 # include <stdint.h>
 #endif
+
 #include "stm32_rcc.h"
 #include "stm32_sdio.h"
 #include "stm32.h"
@@ -54,6 +55,12 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+// <YS>
+/* DMA channels *************************************************************/
+
+/* ADC */
+
+#define ADC1_DMA_CHAN     STM32_DMA1_CHAN1
 
 /* Clocking *************************************************************************/
 
@@ -90,10 +97,16 @@
 #define STM32_PCLK2_FREQUENCY   STM32_HCLK_FREQUENCY
 #define STM32_APB2_CLKIN        (STM32_PCLK2_FREQUENCY)   /* Timers 2-7, 12-14 */
 
+// <YS> ADC clock 72 / 6 = 12 MHz
+#define STM32_RCC_CFGR_ADCPRE   RCC_CFGR_PLCK2d6
+
 /* APB2 timers 1 and 8 will receive PCLK2. */
 
 #define STM32_APB2_TIM1_CLKIN   (STM32_PCLK2_FREQUENCY)
 #define STM32_APB2_TIM8_CLKIN   (STM32_PCLK2_FREQUENCY)
+
+// <YS>
+#define STM32_TIMCLK2            STM32_APB2_TIM1_CLKIN
 
 /* APB1 clock (PCLK1) is HCLK/2 (36MHz) */
 
@@ -108,6 +121,9 @@
 #define STM32_APB1_TIM5_CLKIN   (2*STM32_PCLK1_FREQUENCY)
 #define STM32_APB1_TIM6_CLKIN   (2*STM32_PCLK1_FREQUENCY)
 #define STM32_APB1_TIM7_CLKIN   (2*STM32_PCLK1_FREQUENCY)
+
+// <YS>
+#define STM32_TIMCLK1           STM32_APB1_TIM2_CLKIN
 
 /* MCO output driven by PLL3. From above, we already have PLL3 input frequency as:
  *
@@ -324,9 +340,9 @@
  * 93 PB7  I2C1_SDA
  */
 
-#if defined(CONFIG_STM32_I2C1) && defined(CONFIG_STM32_I2C1_REMAP)
-#  error "CONFIG_STM32_I2C1 must not have CONFIG_STM32_I2C1_REMAP"
-#endif
+// #if defined(CONFIG_STM32_I2C1) && defined(CONFIG_STM32_I2C1_REMAP)
+// #  error "CONFIG_STM32_I2C1 must not have CONFIG_STM32_I2C1_REMAP"
+// #endif
 
 /* I2S
  *

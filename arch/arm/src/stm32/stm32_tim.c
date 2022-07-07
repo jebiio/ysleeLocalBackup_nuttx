@@ -352,26 +352,34 @@ static void stm32_tim_disableint(FAR struct stm32_tim_dev_s *dev, int source);
 static void stm32_tim_ackint(FAR struct stm32_tim_dev_s *dev, int source);
 static int  stm32_tim_checkint(FAR struct stm32_tim_dev_s *dev, int source);
 
-/************************************************************************************
+// <YS>
+static int stm32_tim_prioritizeirq(FAR struct stm32_tim_dev_s *dev, uint32_t prio);
+
+ /************************************************************************************
  * Private Data
  ************************************************************************************/
 
 static const struct stm32_tim_ops_s stm32_tim_ops =
-{
-  .setmode    = stm32_tim_setmode,
-  .setclock   = stm32_tim_setclock,
-  .setperiod  = stm32_tim_setperiod,
-  .getcounter = stm32_tim_getcounter,
-  .setcounter = stm32_tim_setcounter,
-  .getwidth   = stm32_tim_getwidth,
-  .setchannel = stm32_tim_setchannel,
-  .setcompare = stm32_tim_setcompare,
-  .getcapture = stm32_tim_getcapture,
-  .setisr     = stm32_tim_setisr,
-  .enableint  = stm32_tim_enableint,
-  .disableint = stm32_tim_disableint,
-  .ackint     = stm32_tim_ackint,
-  .checkint   = stm32_tim_checkint,
+    {
+        .setmode = stm32_tim_setmode,
+        .setclock = stm32_tim_setclock,
+        .setperiod = stm32_tim_setperiod,
+        .getcounter = stm32_tim_getcounter,
+        .setcounter = stm32_tim_setcounter,
+        .getwidth = stm32_tim_getwidth,
+        .setchannel = stm32_tim_setchannel,
+        .setcompare = stm32_tim_setcompare,
+        .getcapture = stm32_tim_getcapture,
+        .setisr = stm32_tim_setisr,
+        .enableint = stm32_tim_enableint,
+        .disableint = stm32_tim_disableint,
+        .ackint = stm32_tim_ackint,
+        .checkint = stm32_tim_checkint,
+        .prioritize = stm32_tim_prioritizeirq,
+        .sp_putreg16 = stm32_putreg16,
+        .sp_getreg16 = stm32_getreg16,
+        .sp_modreg16 = stm32_modifyreg16,
+
 };
 
 #ifdef CONFIG_STM32_TIM1
@@ -1658,6 +1666,107 @@ static int stm32_tim_setisr(FAR struct stm32_tim_dev_s *dev, xcpt_t handler,
   irq_attach(vectorno, handler ,arg);
   up_enable_irq(vectorno);
 
+  return OK;
+}
+
+// <YS>
+static int stm32_tim_prioritizeirq(FAR struct stm32_tim_dev_s *dev, uint32_t prio)
+{
+  int vectorno;
+
+  switch (((struct stm32_tim_priv_s *)dev)->base)
+  {
+#ifdef CONFIG_STM32_TIM1
+  case STM32_TIM1_BASE:
+    vectorno = STM32_IRQ_TIM1UP;
+    break;
+#endif
+#ifdef CONFIG_STM32_TIM2
+  case STM32_TIM2_BASE:
+    vectorno = STM32_IRQ_TIM2;
+    break;
+#endif
+#ifdef CONFIG_STM32_TIM3
+  case STM32_TIM3_BASE:
+    vectorno = STM32_IRQ_TIM3;
+    break;
+#endif
+#ifdef CONFIG_STM32_TIM4
+  case STM32_TIM4_BASE:
+    vectorno = STM32_IRQ_TIM4;
+    break;
+#endif
+#ifdef CONFIG_STM32_TIM5
+  case STM32_TIM5_BASE:
+    vectorno = STM32_IRQ_TIM5;
+    break;
+#endif
+#ifdef CONFIG_STM32_TIM6
+  case STM32_TIM6_BASE:
+    vectorno = STM32_IRQ_TIM6;
+    break;
+#endif
+#ifdef CONFIG_STM32_TIM7
+  case STM32_TIM7_BASE:
+    vectorno = STM32_IRQ_TIM7;
+    break;
+#endif
+#ifdef CONFIG_STM32_TIM8
+  case STM32_TIM8_BASE:
+    vectorno = STM32_IRQ_TIM8UP;
+    break;
+#endif
+#ifdef CONFIG_STM32_TIM9
+  case STM32_TIM9_BASE:
+    vectorno = STM32_IRQ_TIM9;
+    break;
+#endif
+#ifdef CONFIG_STM32_TIM10
+  case STM32_TIM10_BASE:
+    vectorno = STM32_IRQ_TIM10;
+    break;
+#endif
+#ifdef CONFIG_STM32_TIM11
+  case STM32_TIM11_BASE:
+    vectorno = STM32_IRQ_TIM11;
+    break;
+#endif
+#ifdef CONFIG_STM32_TIM12
+  case STM32_TIM12_BASE:
+    vectorno = STM32_IRQ_TIM12;
+    break;
+#endif
+#ifdef CONFIG_STM32_TIM13
+  case STM32_TIM13_BASE:
+    vectorno = STM32_IRQ_TIM13;
+    break;
+#endif
+#ifdef CONFIG_STM32_TIM14
+  case STM32_TIM14_BASE:
+    vectorno = STM32_IRQ_TIM14;
+    break;
+#endif
+#ifdef CONFIG_STM32_TIM15
+  case STM32_TIM15_BASE:
+    vectorno = STM32_IRQ_TIM15;
+    break;
+#endif
+#ifdef CONFIG_STM32_TIM16
+  case STM32_TIM16_BASE:
+    vectorno = STM32_IRQ_TIM16;
+    break;
+#endif
+#ifdef CONFIG_STM32_TIM17
+  case STM32_TIM17_BASE:
+    vectorno = STM32_IRQ_TIM17;
+    break;
+#endif
+
+  default:
+    return -EINVAL;
+  }
+
+  up_prioritize_irq(vectorno, prio);
   return OK;
 }
 

@@ -49,6 +49,10 @@
 #include "stm32.h"
 #include "sapog.h"
 
+#include "stm32_lm75.h"
+#include "stm32_wdg.h"
+#include <arch/board/board.h>
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -234,6 +238,42 @@ int board_app_initialize(uintptr_t arg)
     }
 #endif
 
-  UNUSED(ret);
-  return OK;
+#ifdef CONFIG_PWM
+  /* Initialize PWM and register the PWM device. */
+
+  ret = stm32_pwm_setup();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: stm32_pwm_setup() failed: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_LM75_I2C
+    /* Configure and initialize the LM75 sensor */
+
+    ret = board_lm75_initialize(0, 1);
+    if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: stm32_lm75initialize() failed: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_STM32_IWDG
+    /* Initialize the watchdog timer */
+
+    stm32_iwdginitialize("/dev/watchdog0", STM32_LSI_FREQUENCY);
+#endif
+
+#if defined(CONFIG_TIMER)
+    /* Initialize the timer, at this moment it's only Timer 1,2,3 */
+#if defined(CONFIG_STM32_TIM4)
+    stm32_timer_driver_setup("/dev/timer4", 4);
+#endif
+#if defined(CONFIG_STM32_TIM6)
+    stm32_timer_driver_setup("/dev/timer6", 6);
+#endif
+#endif
+
+    UNUSED(ret);
+    return OK;
 }

@@ -409,7 +409,7 @@ static int timer_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
      * Argument:    A 32-bit timeout value in microseconds.
      */
 
-    case TCIOC_MAXTIMEOUT:
+      case TCIOC_MAXTIMEOUT:
       {
         /*  Get the maximum supported timeout value */
 

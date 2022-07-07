@@ -2105,8 +2105,21 @@ enum adc_io_cmds_e
 #ifdef HAVE_ADC_POWERDOWN
   IO_ENABLE_DISABLE_PDI,
   IO_ENABLE_DISABLE_PDD,
-  IO_ENABLE_DISABLE_PDD_PDI
+  IO_ENABLE_DISABLE_PDD_PDI,
 #endif
+  // <YS>
+  IO_RESET,
+  IO_SETUP_DMA,
+  IO_ENABLE,
+  IO_CALIB,
+  IO_SETUP_ADC1_SQR,
+  IO_SETUP_ADC2_SQR,
+  nvicEnableVector,
+  enable_from_isr,
+  disable_from_isr,
+  put_SR_0,
+  IO_SETUP_ADC1,
+  IO_SETUP_ADC2,
 };
 
 /* ADC resolution can be reduced in order to perform faster conversion */

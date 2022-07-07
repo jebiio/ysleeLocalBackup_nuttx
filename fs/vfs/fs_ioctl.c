@@ -185,6 +185,7 @@ int nx_vioctl(int fd, int req, va_list ap)
             arg = va_arg(ap, FAR int *);
             if (arg && *arg)
               {
+                
                 ret = nx_fcntl(fd, F_SETFL,
                                nx_fcntl(fd, F_GETFL) | O_NONBLOCK);
               }

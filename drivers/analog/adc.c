@@ -62,6 +62,8 @@
 
 #include <nuttx/irq.h>
 
+#include <stdio.h>
+
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
@@ -230,6 +232,7 @@ static int adc_close(FAR struct file *filep)
 static ssize_t adc_read(FAR struct file *filep, FAR char *buffer,
                         size_t buflen)
 {
+
   FAR struct inode     *inode = filep->f_inode;
   FAR struct adc_dev_s *dev   = inode->i_private;
   size_t                nread;
@@ -509,6 +512,7 @@ static void adc_notify(FAR struct adc_dev_s *dev)
 
 static int adc_poll(FAR struct file *filep, struct pollfd *fds, bool setup)
 {
+
   FAR struct inode     *inode = filep->f_inode;
   FAR struct adc_dev_s *dev   = inode->i_private;
   irqstate_t flags;

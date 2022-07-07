@@ -1,0 +1,10 @@
+si 1
+speed 1000
+device stm32f105rc
+connect stm32f105rc
+S
+r
+sleep 200
+loadbin nuttx.bin 0x08000000
+r
+g

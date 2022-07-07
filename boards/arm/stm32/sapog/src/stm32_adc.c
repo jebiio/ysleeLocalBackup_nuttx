@@ -72,14 +72,17 @@
 #  undef CONFIG_STM32_ADC1
 #endif
 
-#if defined(CONFIG_STM32_ADC1) || defined(CONFIG_STM32_ADC2) || defined(CONFIG_STM32_ADC3)
-#ifndef CONFIG_STM32_ADC1
-#  warning "Channel information only available for ADC1"
-#endif
+// <YS>
+// #if defined(CONFIG_STM32_ADC1) || defined(CONFIG_STM32_ADC2) || defined(CONFIG_STM32_ADC3)
+// #ifndef CONFIG_STM32_ADC1
+// #  warning "Channel information only available for ADC1"
+// #endif
 
 /* The number of ADC channels in the conversion list */
 
-#define ADC1_NCHANNELS 1
+// <YS>
+#define ADC1_NCHANNELS 3
+#define ADC2_NCHANNELS 3
 
 /****************************************************************************
  * Private Data
@@ -96,12 +99,21 @@
  *  ADC_IN9 (PB1) CON5 CN14 Pin1
  */
 
+// <YS>
 #ifdef CONFIG_STM32_ADC1
-static const uint8_t  g_chanlist[ADC1_NCHANNELS] = {10}; //{10, 8, 9};
+static const uint8_t  g_chanlist1[ADC1_NCHANNELS] = {1, 3, 4}; //{10, 8, 9};
 
 /* Configurations of pins used by each ADC channel */
 
-static const uint32_t g_pinlist[ADC1_NCHANNELS]  = {GPIO_ADC12_IN10}; //{GPIO_ADC12_IN10, GPIO_ADC12_IN8, GPIO_ADC12_IN9};
+static const uint32_t g_pinlist1[ADC1_NCHANNELS] = {GPIO_ADC12_IN1, GPIO_ADC12_IN3, GPIO_ADC12_IN4}; //{GPIO_ADC12_IN10, GPIO_ADC12_IN8, GPIO_ADC12_IN9};
+#endif
+
+#ifdef CONFIG_STM32_ADC2
+static const uint8_t g_chanlist2[ADC1_NCHANNELS] = {2, 3, 5}; //{10, 8, 9};
+
+/* Configurations of pins used by each ADC channel */
+
+static const uint32_t g_pinlist2[ADC1_NCHANNELS] = {GPIO_ADC12_IN2, GPIO_ADC12_IN3, GPIO_ADC12_IN5}; //{GPIO_ADC12_IN10, GPIO_ADC12_IN8, GPIO_ADC12_IN9};
 #endif
 
 /****************************************************************************
@@ -120,43 +132,69 @@ int stm32_adc_setup(void)
 {
 #ifdef CONFIG_STM32_ADC1
   static bool initialized = false;
-  struct adc_dev_s *adc;
+  struct adc_dev_s *adc1, *adc2;
   int ret;
   int i;
 
   /* Check if we have already initialized */
 
   if (!initialized)
+  {
+    /* Configure the pins as analog inputs for the selected channels */
+
+    for (i = 0; i < ADC1_NCHANNELS; i++)
     {
-      /* Configure the pins as analog inputs for the selected channels */
-
-      for (i = 0; i < ADC1_NCHANNELS; i++)
-        {
-          stm32_configgpio(g_pinlist[i]);
-        }
-
-      /* Call stm32_adcinitialize() to get an instance of the ADC interface */
-
-      adc = stm32_adcinitialize(1, g_chanlist, ADC1_NCHANNELS);
-      if (adc == NULL)
-        {
-          aerr("ERROR: Failed to get ADC interface\n");
-          return -ENODEV;
-        }
-
-      /* Register the ADC driver at "/dev/adc0" */
-
-      ret = adc_register("/dev/adc0", adc);
-      if (ret < 0)
-        {
-          aerr("ERROR: adc_register failed: %d\n", ret);
-          return ret;
-        }
-
-      /* Now we are initialized */
-
-      initialized = true;
+      stm32_configgpio(g_pinlist1[i]);
     }
+
+    /* Call stm32_adcinitialize() to get an instance of the ADC interface */
+
+    adc1 = stm32_adcinitialize(1, g_chanlist1, ADC1_NCHANNELS);
+    if (adc1 == NULL)
+    {
+      aerr("ERROR: Failed to get ADC interface\n");
+      return -ENODEV;
+    }
+
+    /* Register the ADC driver at "/dev/adc0" */
+
+    ret = adc_register("/dev/adc1", adc1);
+    if (ret < 0)
+    {
+      aerr("ERROR: adc_register failed: %d\n", ret);
+      return ret;
+    }
+
+    //<YS>
+    /* Configure the pins as analog inputs for the selected channels */
+
+    for (i = 0; i < ADC2_NCHANNELS; i++)
+    {
+      stm32_configgpio(g_pinlist2[i]);
+    }
+
+    /* Call stm32_adcinitialize() to get an instance of the ADC interface */
+
+    adc2 = stm32_adcinitialize(1, g_chanlist2, ADC2_NCHANNELS);
+    if (adc2 == NULL)
+    {
+      aerr("ERROR: Failed to get ADC interface\n");
+      return -ENODEV;
+    }
+
+    /* Register the ADC driver at "/dev/adc0" */
+
+    ret = adc_register("/dev/adc2", adc2);
+    if (ret < 0)
+    {
+      aerr("ERROR: adc_register failed: %d\n", ret);
+      return ret;
+    }
+
+    /* Now we are initialized */
+
+    initialized = true;
+  }
 
   return OK;
 #else
@@ -164,5 +202,4 @@ int stm32_adc_setup(void)
 #endif
 }
 
-#endif /* CONFIG_STM32_ADC1 || CONFIG_STM32_ADC2 || CONFIG_STM32_ADC3 */
 #endif /* CONFIG_ADC */
