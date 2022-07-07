@@ -1,0 +1,14 @@
+si 1
+speed 1000
+device S32K144
+connect S32K144
+S
+r
+w1 0x40020007, 0x44
+w1 0x40020000, 0x80
+sleep 1000
+loadbin nuttx.bin 0
+r
+g
+q
+
