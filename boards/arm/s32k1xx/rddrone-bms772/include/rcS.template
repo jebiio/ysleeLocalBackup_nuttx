@@ -1,0 +1,11 @@
+ echo "Starting myapp1"
+ "myapp1"
+ echo "Starting BMS"
+ sleep 1
+"free"
+echo "Starting can0"
+"ifup" "can0"
+"bms"
+ sleep 1
+ echo "Started"
+
