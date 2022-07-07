@@ -33,6 +33,9 @@
 #include <nuttx/spi/spi.h>
 #include <nuttx/leds/ws2812.h>
 
+//<YS>
+ //#define CONFIG_WS2812 <YS>
+//<YS>
 #ifdef CONFIG_WS2812
 
 /****************************************************************************
@@ -154,7 +157,6 @@ static inline void ws2812_configspi(FAR struct spi_dev_s *spi)
   /* Configure SPI for the WS2812
    * There is no CS on this device we just use MOSI and it is exclusive
    */
-
   SPI_LOCK(spi, true);  /* Exclusive use of the bus */
   SPI_SETMODE(spi, SPIDEV_MODE3);
   SPI_SETBITS(spi, 8);
@@ -462,11 +464,11 @@ int ws2812_leds_register(FAR const char *devpath, FAR struct spi_dev_s *spi,
 
   priv->spi = spi;
   ws2812_configspi(priv->spi);
-
+ 
   nxsem_init(&priv->exclsem, 0, 1);
-
+  
   SPI_SNDBLOCK(priv->spi, priv->tx_buf, TXBUFF_SIZE(priv->nleds));
-
+  
   /* Register the character driver */
 
   ret = register_driver(devpath, &g_ws2812fops, 0666, priv);
