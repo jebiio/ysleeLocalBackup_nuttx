@@ -110,7 +110,6 @@ int up_create_stack(FAR struct tcb_s *tcb, size_t stack_size, uint8_t ttype)
 {
   size_t alloc_size;
   size_t tls_size;
-
   /* Add the size of the TLS information structure and align. */
 
   tls_size   = INT32_ALIGN_UP(sizeof(struct tls_info_s));
@@ -135,7 +134,6 @@ int up_create_stack(FAR struct tcb_s *tcb, size_t stack_size, uint8_t ttype)
   if (tcb->stack_alloc_ptr && tcb->adj_stack_size != stack_size)
     {
       /* Yes.. Release the old stack */
-
       up_release_stack(tcb, ttype);
     }
 
@@ -143,6 +141,7 @@ int up_create_stack(FAR struct tcb_s *tcb, size_t stack_size, uint8_t ttype)
 
   if (!tcb->stack_alloc_ptr)
     {
+      cli_printf("<ys>we need to allocate a new stack\n"); //<ys>
       /* Allocate the stack.  If DEBUG is enabled (but not stack debug),
        * then create a zeroed stack to make stack dumps easier to trace.
        * If TLS is enabled, then we must allocate aligned stacks.
@@ -179,9 +178,10 @@ int up_create_stack(FAR struct tcb_s *tcb, size_t stack_size, uint8_t ttype)
 #endif
         {
           /* Use the user-space allocator if this is a task or pthread */
-
+          cli_printf("<ys>Use user-apace allocator\n"); //<ys>
           tcb->stack_alloc_ptr =
               (uint32_t *)kumm_memalign(CONFIG_STACK_ALIGNMENT, alloc_size);
+              
         }
 #endif /* CONFIG_TLS_ALIGNED */
 
@@ -217,7 +217,7 @@ int up_create_stack(FAR struct tcb_s *tcb, size_t stack_size, uint8_t ttype)
           alloc_size);
 
       /* Initialize the TLS data structure */
-
+      
       memset(tcb->stack_alloc_ptr, 0, tls_size);
 
 #ifdef CONFIG_STACK_COLORATION
@@ -231,8 +231,9 @@ int up_create_stack(FAR struct tcb_s *tcb, size_t stack_size, uint8_t ttype)
 #endif /* CONFIG_STACK_COLORATION */
 
       board_autoled_on(LED_STACKCREATED);
+      cli_printf("<ys>Success to allocate a stack in arm_createstack.c\n"); //<ys>
       return OK;
     }
-
+  cli_printf("<ys>Failed to allocate a stack in arm_createstack.c\n"); //<ys>
   return ERROR;
 }
