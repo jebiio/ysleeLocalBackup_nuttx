@@ -1,0 +1,5 @@
+si 1
+speed 1000
+device stm32f105rc
+connect stm32f105rc
+

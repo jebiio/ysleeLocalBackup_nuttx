@@ -2379,7 +2379,6 @@ static void adc_mode_cfg(FAR struct stm32_dev_s *priv)
   uint32_t setbits = 0;
 
   /* Disable continuous mode and set align to right */
-
   clrbits = ADC_CFGR1_CONT | ADC_CFGR1_ALIGN;
 
   /* Disable external trigger for regular channels */
@@ -2436,7 +2435,6 @@ static void adc_mode_cfg(FAR struct stm32_dev_s *priv)
 #endif
 
   /* Disable continuous mode and set align to right */
-
   clrbits = ADC_CR2_CONT | ADC_CR2_ALIGN;
   setbits = 0;
 

@@ -66,6 +66,7 @@
  *   2. STM32 TIMER IP version 2 - F3 (no F37x), F7, H7, L4, L4+
  */
 
+
 #ifdef CONFIG_STM32_PWM
 
 /****************************************************************************
@@ -500,6 +501,7 @@ static uint8_t pwm_pulsecount(uint32_t count);
 /* PWM driver methods */
 
 static int pwm_setup(FAR struct pwm_lowerhalf_s *dev);
+static int pwm_mysetup(FAR struct pwm_lowerhalf_s *dev);
 static int pwm_shutdown(FAR struct pwm_lowerhalf_s *dev);
 
 #ifdef CONFIG_PWM_PULSECOUNT
@@ -510,6 +512,9 @@ static int pwm_start(FAR struct pwm_lowerhalf_s *dev,
 static int pwm_start(FAR struct pwm_lowerhalf_s *dev,
                      FAR const struct pwm_info_s *info);
 #endif
+
+// static int pwm_mystart(FAR struct pwm_lowerhalf_s *dev,
+//                      FAR const struct pwm_info_s *info, uint8_t phase, bool inverted);
 
 static int pwm_stop(FAR struct pwm_lowerhalf_s *dev);
 static int pwm_ioctl(FAR struct pwm_lowerhalf_s *dev,
@@ -530,6 +535,7 @@ static const struct pwm_ops_s g_pwmops =
   .start       = pwm_start,
   .stop        = pwm_stop,
   .ioctl       = pwm_ioctl,
+  .mysetup     = pwm_mysetup,
 };
 
 #ifdef CONFIG_STM32_PWM_LL_OPS
@@ -3203,7 +3209,6 @@ static int pwm_break_dt_configure(FAR struct stm32_pwmtimer_s *priv)
   /* Configure lock */
 
   bdtr |= priv->lock << ATIM_BDTR_LOCK_SHIFT;
-
   /* Write BDTR register at once */
 
   pwm_putreg(priv, STM32_ATIM_BDTR_OFFSET, bdtr);
@@ -3468,9 +3473,12 @@ errout:
 static int pwm_configure(FAR struct pwm_lowerhalf_s *dev)
 {
   FAR struct stm32_pwmtimer_s *priv = (FAR struct stm32_pwmtimer_s *)dev;
+  
   uint16_t outputs = 0;
   uint8_t j        = 0;
   int     ret      = OK;
+  
+
 
   /* NOTE: leave timer counter disabled and all outputs disabled! */
 
@@ -4196,6 +4204,77 @@ errout:
   return ret;
 }
 
+static int pwm_mysetup(FAR struct pwm_lowerhalf_s *dev)
+{
+  static int count;
+  FAR struct stm32_pwmtimer_s *priv = (FAR struct stm32_pwmtimer_s *)dev;
+  FAR struct stm32_pwmtimer_s *priv2 = (FAR struct stm32_pwmtimer_s *)dev;
+  int      ret    = OK;
+
+  if (count == 1)
+  {
+    priv2->channels[0].mode = priv->channels[2].mode;
+    priv2->channels[1].mode = priv->channels[0].mode;
+    priv2->channels[2].mode = priv->channels[1].mode;
+    priv2->channels[0].out1 = priv->channels[2].out1;
+    priv2->channels[1].out1 = priv->channels[0].out1;
+    priv2->channels[2].out1 = priv->channels[1].out1;
+    priv2->channels[0].out2 = priv->channels[2].out2;
+    priv2->channels[1].out2 = priv->channels[0].out2;
+    priv2->channels[2].out2 = priv->channels[1].out2;
+  }
+  if (count == 2)
+  {
+    priv2->channels[0].mode = priv->channels[1].mode;
+    priv2->channels[1].mode = priv->channels[2].mode;
+    priv2->channels[2].mode = priv->channels[0].mode;
+    priv2->channels[0].out1 = priv->channels[1].out1;
+    priv2->channels[1].out1 = priv->channels[2].out1;
+    priv2->channels[2].out1 = priv->channels[0].out1;
+    priv2->channels[0].out2 = priv->channels[1].out2;
+    priv2->channels[1].out2 = priv->channels[2].out2;
+    priv2->channels[2].out2 = priv->channels[0].out2;
+  }
+
+  for (int j = 0; j < priv->chan_num; j++)
+    {
+      /* Skip channel if not in use */
+
+      if (priv->channels[j].channel != 0)
+        {
+          /* Update PWM mode */
+
+          ret = pwm_mode_configure(dev, priv->channels[j].channel,
+                                   priv->channels[j].mode);
+          if (ret < 0)
+            {
+              goto errout;
+            }
+
+          /* PWM outputs configuration */
+
+          ret = pwm_output_configure(priv, priv->channels[j].channel);
+          if (ret < 0)
+            {
+              goto errout;
+            }
+        }
+    }
+
+//   ret = pwm_configure(priv2);
+//   if (ret < 0)
+//     {
+//       pwmerr("failed to configure PWM %d\n", priv->timid);
+//       ret = ERROR;
+//       goto errout;
+//     }
+//     count++;
+//     if (count == 3){ count = 0;}
+
+errout:
+  return ret;
+}
+
 /****************************************************************************
  * Name: pwm_shutdown
  *
@@ -4355,6 +4434,58 @@ static int pwm_start(FAR struct pwm_lowerhalf_s *dev,
   return ret;
 }
 #endif /* CONFIG_PWM_PULSECOUNT */
+
+// static int pwm_mystart(FAR struct pwm_lowerhalf_s *dev,
+//                      FAR const struct pwm_info_s *info, uint8_t phase, bool inverted)
+// {
+//   printf("<YS> Lower Drvier\n");
+//   FAR struct stm32_pwmtimer_s *priv = (FAR struct stm32_pwmtimer_s *)dev;
+//   int ret = OK;
+
+//   /* if frequency has not changed we just update duty */
+//   if (info->frequency == priv->frequency)
+//     {
+// #ifdef CONFIG_PWM_MULTICHAN
+// 	if (phase == 0) {
+// 		if (inverted) {
+// 			ret = pwm_mode_configure(dev, info->channels[0].channel, STM32_CHANMODE_PWM2);
+//       ret = pwm_duty_update(dev, info->channels[0].channel, info->channels[0].duty);
+// 		} else {
+// 			ret = pwm_mode_configure(dev, info->channels[0].channel, STM32_CHANMODE_PWM1);
+//       ret = pwm_duty_update(dev, info->channels[0].channel, info->channels[0].duty);
+// 		}
+// 	} else if (phase == 1) {
+// 		if (inverted) {
+// 			ret = pwm_mode_configure(dev, info->channels[1].channel, STM32_CHANMODE_PWM2);
+//       ret = pwm_duty_update(dev, info->channels[1].channel, info->channels[1].duty);
+// 		} else {
+// 			ret = pwm_mode_configure(dev, info->channels[1].channel, STM32_CHANMODE_PWM1);
+//       ret = pwm_duty_update(dev, info->channels[1].channel, info->channels[1].duty);
+// 		}
+// 	} else {
+// 		if (inverted) {
+// 			ret = pwm_mode_configure(dev, info->channels[2].channel, STM32_CHANMODE_PWM2);
+//       ret = pwm_duty_update(dev, info->channels[2].channel, info->channels[2].duty);
+// 		} else {
+// 			ret = pwm_mode_configure(dev, info->channels[2].channel, STM32_CHANMODE_PWM1);
+//       ret = pwm_duty_update(dev, info->channels[2].channel, info->channels[2].duty);
+// 		}
+// 	}
+
+//     }else
+//     {
+//       ret = pwm_timer(dev, info);
+
+//       /* Save current frequency */
+
+//       if (ret == OK)
+//         {
+//           priv->frequency = info->frequency;
+//         }
+//     }
+//   return ret;
+// }
+// #endif /* CONFIG_PWM_PULSECOUNT */
 
 /****************************************************************************
  * Name: pwm_stop

@@ -44,9 +44,22 @@
 #include <nuttx/compiler.h>
 #include <stdint.h>
 
+
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
+/* <YS>> *************************************************************************/
+
+#define SAPOG_PWMTIMER   1
+#define SAPOG_PWMCHANNEL 3
+
+#ifdef CONFIG_PWM
+int stm32_pwm_setup(void);
+#endif
+
+
 /* Configuration ****************************************************************************/
 /* How many SPI modules does this chip support? */
 
@@ -147,6 +160,7 @@
                          GPIO_OUTPUT_SET|GPIO_PORTD|GPIO_PIN4)
 #define GPIO_LED4       (GPIO_OUTPUT|GPIO_CNF_OUTPP|GPIO_MODE_50MHz|\
                          GPIO_OUTPUT_SET|GPIO_PORTD|GPIO_PIN7)
+
 
 /* TFT LCD
  *
@@ -276,7 +290,7 @@
 #define GPIO_LCD_RS     (GPIO_OUTPUT|GPIO_CNF_OUTPP|GPIO_MODE_50MHz|\
                          GPIO_OUTPUT_SET|GPIO_PORTD|GPIO_PIN13)
 #define GPIO_LCD_CS     (GPIO_OUTPUT|GPIO_CNF_OUTPP|GPIO_MODE_50MHz|\
-                         GPIO_OUTPUT_SET|GPIO_PORTC|GPIO_PIN8)
+                          GPIO_OUTPUT_SET|GPIO_PORTC|GPIO_PIN8)
 #define GPIO_LCD_RD     (GPIO_OUTPUT|GPIO_CNF_OUTPP|GPIO_MODE_50MHz|\
                          GPIO_OUTPUT_SET|GPIO_PORTD|GPIO_PIN15)
 #define GPIO_LCD_WR     (GPIO_OUTPUT|GPIO_CNF_OUTPP|GPIO_MODE_50MHz|\

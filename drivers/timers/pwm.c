@@ -42,6 +42,7 @@
 #include <nuttx/timers/pwm.h>
 
 #include <nuttx/irq.h>
+#include <stdio.h>
 
 #ifdef CONFIG_PWM
 
@@ -86,6 +87,8 @@ static ssize_t pwm_write(FAR struct file *filep, FAR const char *buffer,
 static int     pwm_start(FAR struct pwm_upperhalf_s *upper,
                          unsigned int oflags);
 static int     pwm_ioctl(FAR struct file *filep, int cmd, unsigned long arg);
+
+
 
 /****************************************************************************
  * Private Data
@@ -157,9 +160,9 @@ static int pwm_open(FAR struct file *filep)
 
   ret = nxsem_wait(&upper->exclsem);
   if (ret < 0)
-    {
-      goto errout;
-    }
+  {
+    goto errout;
+  }
 
   /* Increment the count of references to the device.  If this the first
    * time that the driver has been opened for this device, then initialize
@@ -404,7 +407,42 @@ static int pwm_start(FAR struct pwm_upperhalf_s *upper, unsigned int oflags)
 
   return ret;
 }
+
+
 #endif
+
+// static int pwm_mystart(FAR struct pwm_upperhalf_s *upper, unsigned int oflags, FAR struct mystruct_s *s)
+// {
+//   FAR struct pwm_lowerhalf_s *lower;
+//   int ret = OK;
+
+//   DEBUGASSERT(upper != NULL);
+//   lower = upper->dev;
+//   DEBUGASSERT(lower != NULL && lower->ops->start != NULL);
+
+//   /* Verify that the PWM is not already running */
+
+//   if (!upper->started)
+//     {
+//       /* Invoke the bottom half method to start the pulse train */
+
+//       ret = lower->ops->mystart(lower, &upper->info, s->phase2, s->pos);
+//       ret = lower->ops->mystart(lower, &upper->info, s->phase3, s->neg);
+
+//       /* A return value of zero means that the pulse train was started
+//        * successfully.
+//        */
+
+//       if (ret == OK)
+//         {
+//           /* Indicate that the pulse train has started */
+
+//           upper->started = true;
+//         }
+//     }
+
+//   return ret;
+// }
 
 /****************************************************************************
  * Name: pwm_ioctl
@@ -509,6 +547,16 @@ static int pwm_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
           ret = pwm_start(upper, filep->f_oflags);
         }
         break;
+
+      case PWMIOC_MYSET:
+        {
+          ret = lower->ops->mysetup(lower);
+
+        }
+        break;
+
+        
+
 
       /* PWMIOC_STOP - Stop the pulsed output.
        *

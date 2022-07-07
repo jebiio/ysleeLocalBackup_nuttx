@@ -121,10 +121,22 @@
 #define PWMIOC_GETCHARACTERISTICS _PWMIOC(2)
 #define PWMIOC_START              _PWMIOC(3)
 #define PWMIOC_STOP               _PWMIOC(4)
+//<YS>
+#define PWMIOC_MYSET            _PWMIOC(5)
 
 /****************************************************************************
  * Public Types
  ****************************************************************************/
+//<YS>
+struct mystruct_s
+{
+  uint8_t phase1;
+  uint8_t phase2;
+  uint8_t phase3;
+  bool pos;
+  bool neg;
+};
+
 
 /* If the PWM peripheral supports multiple output channels, then this
  * structure describes the output state on one channel.
@@ -203,6 +215,9 @@ struct pwm_ops_s
 
   CODE int (*ioctl)(FAR struct pwm_lowerhalf_s *dev,
                     int cmd, unsigned long arg);
+
+  CODE int (*mysetup)(FAR struct pwm_lowerhalf_s *dev);
+
 };
 
 /* This structure is the generic form of state structure used by lower half

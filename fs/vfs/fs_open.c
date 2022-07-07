@@ -125,9 +125,9 @@ int nx_vopen(FAR const char *path, int oflags, va_list ap)
 #endif
 
   /* Get an inode for this file */
-
+  
   SETUP_SEARCH(&desc, path, false);
-
+  
   ret = inode_find(&desc);
   if (ret < 0)
     {
@@ -140,7 +140,7 @@ int nx_vopen(FAR const char *path, int oflags, va_list ap)
     }
 
   /* Get the search results */
-
+  
   inode = desc.node;
   DEBUGASSERT(inode != NULL);
 
@@ -212,7 +212,7 @@ int nx_vopen(FAR const char *path, int oflags, va_list ap)
     }
 
   /* Get the file structure corresponding to the file descriptor. */
-
+  
   ret = fs_getfilep(fd, &filep);
   if (ret < 0)
     {
@@ -223,7 +223,7 @@ int nx_vopen(FAR const char *path, int oflags, va_list ap)
    * called many times.  The driver/mountpoint logic should handled this
    * because it may also be closed that many times.
    */
-
+  
   ret = OK;
   if (inode->u.i_ops->open)
     {
@@ -287,7 +287,7 @@ errout_with_fd:
 
 errout_with_inode:
   inode_release(inode);
-
+  
 errout_with_search:
   RELEASE_SEARCH(&desc);
   return ret;
@@ -341,12 +341,11 @@ int open(FAR const char *path, int oflags, ...)
   int fd;
 
   /* open() is a cancellation point */
-
   enter_cancellation_point();
-
   /* Let nx_vopen() do most of the work */
 
   va_start(ap, oflags);
+  
   fd = nx_vopen(path, oflags, ap);
   va_end(ap);
 

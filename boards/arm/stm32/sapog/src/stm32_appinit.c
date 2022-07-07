@@ -49,6 +49,12 @@
 #include "stm32.h"
 #include "sapog.h"
 
+//<YS> header
+#ifdef CONFIG_SENSORS_LM75
+#include "stm32_lm75.h"
+#endif
+
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -132,6 +138,10 @@
 
 #ifndef CONFIG_USBHOST
 #  undef HAVE_USBHOST
+#endif
+
+#ifdef CONFIG_USERLED
+#  include <nuttx/leds/userled.h>
 #endif
 
 /****************************************************************************
@@ -233,6 +243,37 @@ int board_app_initialize(uintptr_t arg)
       syslog(LOG_ERR, "ERROR: stm32_can_setup failed: %d\n", ret);
     }
 #endif
+
+#ifdef CONFIG_USERLED
+  /* Register the LED driver */
+
+  ret = userled_lower_initialize("/dev/userleds");
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: userled_lower_initialize() failed: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_LM75_I2C
+  /* Configure and initialize the LM75 sensor */
+
+  ret = board_lm75_initialize(0, 1);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: stm32_lm75initialize() failed: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_PWM
+  /* Initialize PWM and register the PWM device. */
+
+  ret = stm32_pwm_setup();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: stm32_pwm_setup() failed: %d\n", ret);
+    }
+#endif
+
 
   UNUSED(ret);
   return OK;

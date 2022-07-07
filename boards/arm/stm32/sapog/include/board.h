@@ -51,6 +51,11 @@
 
 #include <nuttx/arch.h>
 
+
+
+
+
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -129,15 +134,15 @@
 #define BOARD_LED1          0
 #define BOARD_LED2          1
 #define BOARD_LED3          2
-#define BOARD_LED4          3
-#define BOARD_NLEDS         4
+// #define BOARD_LED4          3
+#define BOARD_NLEDS         3
 
 /* LED bits for use with board_userled_all() */
 
 #define BOARD_LED1_BIT      (1 << BOARD_LED1)
 #define BOARD_LED2_BIT      (1 << BOARD_LED2)
 #define BOARD_LED3_BIT      (1 << BOARD_LED3)
-#define BOARD_LED4_BIT      (1 << BOARD_LED4)
+// #define BOARD_LED4_BIT      (1 << BOARD_LED4)
 
 /* If CONFIG_ARCH_LEDs is defined, then NuttX will control the 4 LEDs on board the
  * STM3240G-EVAL.  The following definitions describe how NuttX controls the LEDs:
@@ -324,9 +329,9 @@
  * 93 PB7  I2C1_SDA
  */
 
-#if defined(CONFIG_STM32_I2C1) && defined(CONFIG_STM32_I2C1_REMAP)
-#  error "CONFIG_STM32_I2C1 must not have CONFIG_STM32_I2C1_REMAP"
-#endif
+// #if defined(CONFIG_STM32_I2C1) && defined(CONFIG_STM32_I2C1_REMAP)
+// #  error "CONFIG_STM32_I2C1 must not have CONFIG_STM32_I2C1_REMAP"
+// #endif
 
 /* I2S
  *

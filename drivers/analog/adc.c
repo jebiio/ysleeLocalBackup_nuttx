@@ -236,9 +236,11 @@ static ssize_t adc_read(FAR struct file *filep, FAR char *buffer,
   irqstate_t            flags;
   int                   ret   = 0;
   int                   msglen;
+  int*                  sem;
 
   ainfo("buflen: %d\n", (int)buflen);
-
+  
+   
   /* Determine the size of the messages to return.
    *
    * REVISIT:  What if buflen is 8 does that mean 4 messages of size 2?  Or
@@ -272,13 +274,16 @@ static ssize_t adc_read(FAR struct file *filep, FAR char *buffer,
       msglen = 5;
     }
 
+  
   if (buflen >= msglen)
     {
+      
       /* Interrupts must be disabled while accessing the ad_recv FIFO */
-
+      
       flags = enter_critical_section();
       while (dev->ad_recv.af_head == dev->ad_recv.af_tail)
         {
+          
           /* The receive FIFO is empty -- was non-blocking mode selected? */
 
           if (filep->f_oflags & O_NONBLOCK)
@@ -290,7 +295,12 @@ static ssize_t adc_read(FAR struct file *filep, FAR char *buffer,
           /* Wait for a message to be received */
 
           dev->ad_nrxwaiters++;
+          nxsem_get_value(&dev->ad_recv.af_sem, sem);
+          
           ret = nxsem_wait(&dev->ad_recv.af_sem);
+
+          nxsem_get_value(&dev->ad_recv.af_sem, sem);
+          
           dev->ad_nrxwaiters--;
           if (ret < 0)
             {
@@ -305,6 +315,7 @@ static ssize_t adc_read(FAR struct file *filep, FAR char *buffer,
       nread = 0;
       do
         {
+          
           FAR struct adc_msg_s *msg =
             &dev->ad_recv.af_buffer[dev->ad_recv.af_head];
 
@@ -390,7 +401,6 @@ static ssize_t adc_read(FAR struct file *filep, FAR char *buffer,
             }
         }
       while (dev->ad_recv.af_head != dev->ad_recv.af_tail);
-
       /* All of the messages have been transferred.  Return the number of
        * bytes that were read.
        */
@@ -400,7 +410,7 @@ static ssize_t adc_read(FAR struct file *filep, FAR char *buffer,
 return_with_irqdisabled:
       leave_critical_section(flags);
     }
-
+  
   ainfo("Returning: %d\n", ret);
   return ret;
 }
