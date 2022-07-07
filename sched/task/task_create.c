@@ -38,6 +38,8 @@
 #include "group/group.h"
 #include "task/task.h"
 
+#include "systemview/SEGGER_SYSVIEW_NuttX.h"
+
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
@@ -195,6 +197,7 @@ int task_create(FAR const char *name, int priority,
                 int stack_size, main_t entry, FAR char * const argv[])
 {
   int ret = nxtask_create(name, priority, stack_size, entry, argv);
+
   if (ret < 0)
     {
       set_errno(-ret);

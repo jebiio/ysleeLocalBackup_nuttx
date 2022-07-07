@@ -111,18 +111,17 @@ int nxtask_init(FAR struct task_tcb_s *tcb, const char *name, int priority,
   if (stack)
     {
       /* Use pre-allocated stack */
-
       ret = up_use_stack(&tcb->cmn, stack, stack_size);
     }
   else
     {
       /* Allocate the stack for the TCB */
-
       ret = up_create_stack(&tcb->cmn, stack_size, ttype);
     }
 
   if (ret < OK)
     {
+      cli_printf("<ys>failed to allocate stack\n"); //<ys>
       goto errout_with_group;
     }
 
@@ -138,7 +137,6 @@ int nxtask_init(FAR struct task_tcb_s *tcb, const char *name, int priority,
   /* Setup to pass parameters to the new task */
 
   nxtask_setup_arguments(tcb, name, argv);
-
   /* Now we have enough in place that we can join the group */
 
   ret = group_initialize(tcb);

@@ -151,12 +151,12 @@ static inline void s32k1xx_lpspi_putreg32(FAR struct s32k1xx_lpspidev_s *priv,
               uint8_t offset, uint32_t value);
 static inline uint32_t s32k1xx_lpspi_readword(FAR struct s32k1xx_lpspidev_s *priv);
 static inline void s32k1xx_lpspi_writeword(FAR struct s32k1xx_lpspidev_s *priv,
-              uint16_t byte);
-static inline bool s32k1xx_lpspi_9to16bitmode(FAR struct s32k1xx_lpspidev_s *priv);
+              uint32_t byte);
+static inline uint16_t s32k1xx_lpspi_9to16bitmode(FAR struct s32k1xx_lpspidev_s *priv);
 static uint32_t s32k1xx_lpspi_pckfreq(uintptr_t base);
-static inline void s32k1xx_lpspi_set_delays(FAR struct s32k1xx_lpspidev_s
+static inline void s32k1xx_lpspi_master_set_delays(FAR struct s32k1xx_lpspidev_s
               *priv, uint32_t delay_ns, enum s32k1xx_delay_e type);
-static inline void s32k1xx_lpspi_set_delay_scaler(FAR struct
+static inline void s32k1xx_lpspi_master_set_delay_scaler(FAR struct
               s32k1xx_lpspidev_s *priv, uint32_t scaler, enum s32k1xx_delay_e type);
 
 /* SPI methods */
@@ -457,7 +457,7 @@ static inline uint32_t s32k1xx_lpspi_readword(FAR struct s32k1xx_lpspidev_s *pri
  ************************************************************************************/
 
 static inline void s32k1xx_lpspi_writeword(FAR struct s32k1xx_lpspidev_s *priv,
-                                           uint16_t word)
+                                           uint32_t word)
 {
   /* Wait until the transmit buffer is empty */
 
@@ -468,6 +468,36 @@ static inline void s32k1xx_lpspi_writeword(FAR struct s32k1xx_lpspidev_s *priv,
   /* Then send the word */
 
   s32k1xx_lpspi_putreg32(priv, S32K1XX_LPSPI_TDR_OFFSET, word);
+}
+
+/************************************************************************************
+ * Name: s32k1xx_lpspi_writeDword
+ *
+ * Description:
+ *   Write two words to SPI
+ *
+ * Input Parameters:
+ *   priv - Device-specific state data
+ *   word0, word1 - words to send
+ *
+ * Returned Value:
+ *   None
+ *
+ ************************************************************************************/
+
+static inline void s32k1xx_lpspi_writeDword(FAR struct s32k1xx_lpspidev_s *priv,
+                                           uint32_t word0, uint32_t word1)
+{
+  /* Wait until the transmit buffer is empty */
+
+  while ((s32k1xx_lpspi_getreg32(priv, S32K1XX_LPSPI_SR_OFFSET) & LPSPI_SR_TDF) == 0)
+    {
+    }
+
+  /* Then send the words, use the FIFO */
+
+  s32k1xx_lpspi_putreg32(priv, S32K1XX_LPSPI_TDR_OFFSET, word0);
+  s32k1xx_lpspi_putreg32(priv, S32K1XX_LPSPI_TDR_OFFSET, word1);
 }
 
 /************************************************************************************
@@ -531,29 +561,22 @@ static inline void s32k1xx_lpspi_writebyte(FAR struct s32k1xx_lpspidev_s *priv,
  *
  * Description:
  *   Check if the SPI is operating in more then 8 bit mode
+ *   On the S32K the frame size can grow to 4096 bit/frame
  *
  * Input Parameters:
  *   priv     - Device-specific state data
  *
  * Returned Value:
- *   true: >8 bit mode-bit mode, false: <= 8-bit mode
+ *   value: frame size
  *
  ************************************************************************************/
 
-static inline bool s32k1xx_lpspi_9to16bitmode(FAR struct s32k1xx_lpspidev_s *priv)
+static inline uint16_t s32k1xx_lpspi_9to16bitmode(FAR struct s32k1xx_lpspidev_s *priv)
 {
-  bool ret;
+  uint16_t ret;
 
-  if (((s32k1xx_lpspi_getreg32(priv, S32K1XX_LPSPI_TCR_OFFSET) &
-        LPSPI_TCR_FRAMESZ_MASK) + 1) < 9)
-    {
-      ret = false;
-    }
-  else
-    {
-      ret = true;
-    }
-
+  ret = ((s32k1xx_lpspi_getreg32(priv, S32K1XX_LPSPI_TCR_OFFSET) &
+        LPSPI_TCR_FRAMESZ_MASK) + 1);
   return ret;
 }
 
@@ -640,7 +663,7 @@ static uint32_t s32k1xx_lpspi_pckfreq(uintptr_t base)
 }
 
 /************************************************************************************
- * Name: s32k1xx_lpspi_set_delays
+ * Name: s32k1xx_lpspi_master_set_delays
  *
  * Description:
  *   SET LPSPI Delay times
@@ -655,10 +678,9 @@ static uint32_t s32k1xx_lpspi_pckfreq(uintptr_t base)
  *
  ************************************************************************************/
 
-static inline void s32k1xx_lpspi_set_delay_scaler(FAR struct
-                                                  s32k1xx_lpspidev_s *priv,
-                                                  uint32_t scaler,
-                                                  enum s32k1xx_delay_e type)
+static inline void s32k1xx_lpspi_master_set_delay_scaler(FAR struct s32k1xx_lpspidev_s *priv,
+                                                         uint32_t scaler,
+                                                         enum s32k1xx_delay_e type)
 {
   switch (type)
     {
@@ -686,7 +708,7 @@ static inline void s32k1xx_lpspi_set_delay_scaler(FAR struct
 }
 
 /************************************************************************************
- * Name: s32k1xx_lpspi_set_delays
+ * Name: s32k1xx_lpspi_master_set_delays
  *
  * Description:
  *   SET LPSPI Delay times
@@ -701,7 +723,7 @@ static inline void s32k1xx_lpspi_set_delay_scaler(FAR struct
  *
  ************************************************************************************/
 
-static inline void s32k1xx_lpspi_set_delays(FAR struct s32k1xx_lpspidev_s *priv,
+static inline void s32k1xx_lpspi_master_set_delays(FAR struct s32k1xx_lpspidev_s *priv,
                                                    uint32_t delay_ns,
                                                    enum s32k1xx_delay_e type)
 {
@@ -786,7 +808,7 @@ static inline void s32k1xx_lpspi_set_delays(FAR struct s32k1xx_lpspidev_s *priv,
 
   if (initial_delay_ns >= delay_ns)
     {
-      s32k1xx_lpspi_set_delay_scaler(priv, 0, type);
+      s32k1xx_lpspi_master_set_delay_scaler(priv, 0, type);
     }
   else
     {
@@ -823,7 +845,7 @@ static inline void s32k1xx_lpspi_set_delays(FAR struct s32k1xx_lpspidev_s *priv,
             }
         }
 
-      s32k1xx_lpspi_set_delay_scaler(priv, best_scaler, type);
+      s32k1xx_lpspi_master_set_delay_scaler(priv, best_scaler, type);
     }
 }
 
@@ -852,7 +874,8 @@ static int s32k1xx_lpspi_lock(FAR struct spi_dev_s *dev, bool lock)
 {
   FAR struct s32k1xx_lpspidev_s *priv = (FAR struct s32k1xx_lpspidev_s *)dev;
   int ret;
-
+// TODO; Needs to be switched of for debugging
+#if 0
   if (lock)
     {
       ret = nxsem_wait_uninterruptible(&priv->exclsem);
@@ -863,6 +886,9 @@ static int s32k1xx_lpspi_lock(FAR struct spi_dev_s *dev, bool lock)
     }
 
   return ret;
+#else
+  return 1;
+#endif
 }
 
 /************************************************************************************
@@ -960,11 +986,11 @@ static uint32_t s32k1xx_lpspi_setfrequency(FAR struct spi_dev_s *dev,
       priv->frequency = frequency;
       priv->actual = best_frequency;
 
-      s32k1xx_lpspi_set_delays(priv, 1000000000 / best_frequency,
+      s32k1xx_lpspi_master_set_delays(priv, 1000000000 / best_frequency,
                                     LPSPI_PCS_TO_SCK);
-      s32k1xx_lpspi_set_delays(priv, 1000000000 / best_frequency,
+      s32k1xx_lpspi_master_set_delays(priv, 1000000000 / best_frequency,
                                     LPSPI_LAST_SCK_TO_PCS);
-      s32k1xx_lpspi_set_delays(priv, 1000000000 / best_frequency,
+      s32k1xx_lpspi_master_set_delays(priv, 1000000000 / best_frequency,
                                     LPSPI_BETWEEN_TRANSFER);
 
       /* Re-enable LPSPI if it was enabled previously */
@@ -1221,6 +1247,57 @@ static uint32_t s32k1xx_lpspi_send(FAR struct spi_dev_s *dev, uint32_t wd)
 }
 
 /************************************************************************************
+ * Name: s32k1xx_lpspi_send2
+ *
+ * Description:
+ *   Exchange two words on SPI
+ *
+ * Input Parameters:
+ *   dev - Device-specific state data
+ *   wd0, wd1  - The word to send.  the size of the data is determined by the
+ *         number of bits selected for the SPI interface.
+ *
+ * Returned Value:
+ *   response
+ *
+ ************************************************************************************/
+
+static uint32_t s32k1xx_lpspi_send2(FAR struct spi_dev_s *dev, uint32_t wd0, uint32_t wd1, uint32_t *rw1)
+{
+  FAR struct s32k1xx_lpspidev_s *priv = (FAR struct s32k1xx_lpspidev_s *)dev;
+  uint32_t regval;
+  uint32_t ret;
+
+  DEBUGASSERT(priv && priv->spibase);
+
+#if 1
+  /* check if the receive buffer is empty, if not clear it */
+  while ((s32k1xx_lpspi_getreg32(priv, S32K1XX_LPSPI_SR_OFFSET) & LPSPI_SR_RDF)) {
+    s32k1xx_lpspi_getreg32(priv, S32K1XX_LPSPI_RDR_OFFSET);
+  }
+#endif
+
+  s32k1xx_lpspi_writeDword(priv, wd0, wd1);
+
+  while ((s32k1xx_lpspi_getreg32(priv, S32K1XX_LPSPI_SR_OFFSET) & LPSPI_SR_RDF) !=
+         LPSPI_SR_RDF);
+
+  ret  = s32k1xx_lpspi_readword(priv);
+  *rw1 = s32k1xx_lpspi_readword(priv);
+
+  /* Check and clear any error flags (Reading from the SR clears the error
+   * flags).
+   */
+
+  regval = s32k1xx_lpspi_getreg32(priv, S32K1XX_LPSPI_SR_OFFSET);
+
+  spiinfo("Sent: %02x %08x  Return: %04x Status: %02x\n", wd1, wd0, ret, regval);
+
+  UNUSED(regval);
+  return ret;
+}
+
+/************************************************************************************
  * Name: s32k1xx_lpspi_exchange (no DMA).  aka s32k1xx_lpspi_exchange_nodma
  *
  * Description:
@@ -1254,42 +1331,85 @@ static void s32k1xx_lpspi_exchange_nodma(FAR struct spi_dev_s *dev,
 {
   FAR struct s32k1xx_lpspidev_s *priv = (FAR struct s32k1xx_lpspidev_s *)dev;
   DEBUGASSERT(priv && priv->spibase);
+  uint16_t frameSize;
 
   spiinfo("txbuffer=%p rxbuffer=%p nwords=%d\n", txbuffer, rxbuffer, nwords);
 
   /* 8- or 16-bit mode? */
-
-  if (s32k1xx_lpspi_9to16bitmode(priv))
+  frameSize = s32k1xx_lpspi_9to16bitmode(priv);
+  if (frameSize > 8)
     {
-      /* 16-bit mode */
+      /* 16-bit, 32-bit or 40-bit mode */
+      /* take care of big endian mode of hardware !! */
 
-      const uint16_t *src = (const uint16_t *)txbuffer;
-      uint16_t *dest = (uint16_t *) rxbuffer;
-      uint16_t word;
+      const uint8_t *src = (const uint8_t *)txbuffer;
+      uint8_t *dest = (uint8_t *) rxbuffer;
+      uint32_t word, word1, rword1;
+      bool     dwords = false;
 
-      while (nwords-- > 0)
-        {
+      while (nwords-- > 0) {
           /* Get the next word to write.  Is there a source buffer? */
 
-          if (src)
-            {
-              word = *src++;
-            }
-          else
-            {
-              word = 0xffff;
-            }
+          if (src) {
+			// read the required number of bytes
+			switch (frameSize) {
+			  case 16:
+				   word = (src[0] << 8) + src[1];
+				   src += 2;
+				   break;
+			  case 32:
+				   word = (src[0] << 24) + (src[1] << 16) + (src[2] << 8) + src[3];
+				   src += 4;
+				   break;
+			  case 40:
+				   word = (src[0] << 24) + (src[1] << 16) + (src[2] << 8) + src[3];
+				   word1 = src[4];
+				   src += 5;
+				   dwords = true;
+			  default: // expect 40 bit TODO
+					  break;
+			}
+          } else {
+              word = 0xffffffff;
+          }
 
           /* Exchange one word */
-
-          word = (uint16_t) s32k1xx_lpspi_send(dev, (uint32_t) word);
+          if (dwords) {
+              word = s32k1xx_lpspi_send2(dev, word, word1, &rword1);
+          } else {
+            word = s32k1xx_lpspi_send(dev, word);
+          }
 
           /* Is there a buffer to receive the return value? */
 
-          if (dest)
-            {
-              *dest++ = word;
+          if (dest) {
+			switch (frameSize) {
+			  case 16:
+				   dest[0] = (word >> 8) & 0xff;
+				   dest[1] =  word       & 0xff;
+				   dest += 2;
+				   break;
+			  case 32:
+				   dest[0] = (word >> 24) & 0xff;
+				   dest[1] = (word >> 16) & 0xff;
+				   dest[2] = (word >>  8) & 0xff;
+				   dest[3] =  word        & 0xff;
+				   dest += 4;
+				   break;
+			  case 40:
+				   dest[0] = (word >> 24) & 0xff;
+				   dest[1] = (word >> 16) & 0xff;
+				   dest[2] = (word >>  8) & 0xff;
+				   dest[3] =  word        & 0xff;
+				   dest[4] =  rword1      & 0xff;
+				   dest += 5;
+				   break;
+
+			  default: // expect 40 bit TODO
+
+					  break;
             }
+	      }
         }
     }
   else
